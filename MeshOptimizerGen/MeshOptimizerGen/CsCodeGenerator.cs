@@ -126,7 +126,7 @@ namespace MeshOptimizerGen
                 foreach (var cppFunction in functionsWithoutDuplicates)
                 {
                     Helpers.PrintComments(file, cppFunction.Comment, "\t\t");
-                    file.WriteLine($"\t\t[DllImport(\"c-tinyusd\", CallingConvention = CallingConvention.Cdecl)]");
+                    file.WriteLine($"\t\t[DllImport(\"meshoptimizer\", CallingConvention = CallingConvention.Cdecl)]");
                     string returnType = Helpers.ConvertToCSharpType(cppFunction.ReturnType);
                     returnType = Helpers.ShowAsMarshalType(returnType, Helpers.Family.ret);
                     file.Write($"\t\tpublic static extern {returnType} {cppFunction.Name}(");

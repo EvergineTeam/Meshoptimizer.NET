@@ -13,7 +13,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// destination must contain enough space for the resulting remap table (vertex_count elements)
 		/// indices can be NULL if the input is unindexed
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_generateVertexRemap(uint* destination, uint* indices, UIntPtr index_count, void* vertices, UIntPtr vertex_count, UIntPtr vertex_size);
 
 		/// <summary>
@@ -28,7 +28,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// <
 		/// = 16
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_generateVertexRemapMulti(uint* destination, uint* indices, UIntPtr index_count, UIntPtr vertex_count, meshopt_Stream* streams, UIntPtr stream_count);
 
 		/// <summary>
@@ -36,7 +36,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// destination must contain enough space for the resulting vertex buffer (unique_vertex_count elements, returned by meshopt_generateVertexRemap)
 		/// vertex_count should be the initial vertex count and not the value returned by meshopt_generateVertexRemap
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_remapVertexBuffer(void* destination, void* vertices, UIntPtr vertex_count, UIntPtr vertex_size, uint* remap);
 
 		/// <summary>
@@ -44,7 +44,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// destination must contain enough space for the resulting index buffer (index_count elements)
 		/// indices can be NULL if the input is unindexed
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_remapIndexBuffer(uint* destination, uint* indices, UIntPtr index_count, uint* remap);
 
 		/// <summary>
@@ -54,7 +54,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// Note that binary equivalence considers all vertex_size bytes, including padding which should be zero-initialized.
 		/// destination must contain enough space for the resulting index buffer (index_count elements)
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_generateShadowIndexBuffer(uint* destination, uint* indices, UIntPtr index_count, void* vertices, UIntPtr vertex_count, UIntPtr vertex_size, UIntPtr vertex_stride);
 
 		/// <summary>
@@ -67,7 +67,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// <
 		/// = 16
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_generateShadowIndexBufferMulti(uint* destination, uint* indices, UIntPtr index_count, UIntPtr vertex_count, meshopt_Stream* streams, UIntPtr stream_count);
 
 		/// <summary>
@@ -80,7 +80,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// destination must contain enough space for the resulting index buffer (index_count*2 elements)
 		/// vertex_positions should have float3 position in the first 12 bytes of each vertex
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_generateAdjacencyIndexBuffer(uint* destination, uint* indices, UIntPtr index_count, float* vertex_positions, UIntPtr vertex_count, UIntPtr vertex_positions_stride);
 
 		/// <summary>
@@ -96,7 +96,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// destination must contain enough space for the resulting index buffer (index_count*4 elements)
 		/// vertex_positions should have float3 position in the first 12 bytes of each vertex
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_generateTessellationIndexBuffer(uint* destination, uint* indices, UIntPtr index_count, float* vertex_positions, UIntPtr vertex_count, UIntPtr vertex_positions_stride);
 
 		/// <summary>
@@ -109,7 +109,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// destination must contain enough space for the resulting index buffer (index_count elements)
 		/// reorder must contain enough space for the worst case reorder table (vertex_count + index_count/3 elements)
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_generateProvokingIndexBuffer(uint* destination, uint* reorder, uint* indices, UIntPtr index_count, UIntPtr vertex_count);
 
 		/// <summary>
@@ -118,7 +118,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// If index buffer contains multiple ranges for multiple draw calls, this functions needs to be called on each range individually.
 		/// destination must contain enough space for the resulting index buffer (index_count elements)
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_optimizeVertexCache(uint* destination, uint* indices, UIntPtr index_count, UIntPtr vertex_count);
 
 		/// <summary>
@@ -127,7 +127,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// However, the resulting index order is more optimal if the goal is to reduce the triangle strip length or improve compression efficiency
 		/// destination must contain enough space for the resulting index buffer (index_count elements)
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_optimizeVertexCacheStrip(uint* destination, uint* indices, UIntPtr index_count, UIntPtr vertex_count);
 
 		/// <summary>
@@ -138,7 +138,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// destination must contain enough space for the resulting index buffer (index_count elements)
 		/// cache_size should be less than the actual GPU cache size to avoid cache thrashing
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_optimizeVertexCacheFifo(uint* destination, uint* indices, UIntPtr index_count, UIntPtr vertex_count, uint cache_size);
 
 		/// <summary>
@@ -150,7 +150,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// vertex_positions should have float3 position in the first 12 bytes of each vertex
 		/// threshold indicates how much the overdraw optimizer can degrade vertex cache efficiency (1.05 = up to 5%) to reduce overdraw more efficiently
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_optimizeOverdraw(uint* destination, uint* indices, UIntPtr index_count, float* vertex_positions, UIntPtr vertex_count, UIntPtr vertex_positions_stride, float threshold);
 
 		/// <summary>
@@ -161,7 +161,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// destination must contain enough space for the resulting vertex buffer (vertex_count elements)
 		/// indices is used both as an input and as an output index buffer
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_optimizeVertexFetch(void* destination, uint* indices, UIntPtr index_count, void* vertices, UIntPtr vertex_count, UIntPtr vertex_size);
 
 		/// <summary>
@@ -171,7 +171,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// The resulting remap table should be used to reorder vertex/index buffers using meshopt_remapVertexBuffer/meshopt_remapIndexBuffer
 		/// destination must contain enough space for the resulting remap table (vertex_count elements)
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_optimizeVertexFetchRemap(uint* destination, uint* indices, UIntPtr index_count, UIntPtr vertex_count);
 
 		/// <summary>
@@ -186,17 +186,17 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// For maximum efficiency the index buffer being encoded has to be optimized for vertex cache and vertex fetch first.
 		/// buffer must contain enough space for the encoded index buffer (use meshopt_encodeIndexBufferBound to compute worst case size)
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_encodeIndexBuffer(* buffer, UIntPtr buffer_size, uint* indices, UIntPtr index_count);
 
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_encodeIndexBufferBound(UIntPtr index_count, UIntPtr vertex_count);
 
 		/// <summary>
 		/// Set index encoder format version
 		/// version must specify the data format version to encode; valid values are 0 (decodable by all library versions) and 1 (decodable by 0.14+)
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_encodeIndexVersion(int version);
 
 		/// <summary>
@@ -206,7 +206,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// The decoder is safe to use for untrusted input, but it may produce garbage data (e.g. out of range indices).
 		/// destination must contain enough space for the resulting index buffer (index_count elements)
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int meshopt_decodeIndexBuffer(void* destination, UIntPtr index_count, UIntPtr index_size, * buffer, UIntPtr buffer_size);
 
 		/// <summary>
@@ -216,10 +216,10 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// Returns encoded data size on success, 0 on error; the only error condition is if buffer doesn't have enough space
 		/// buffer must contain enough space for the encoded index sequence (use meshopt_encodeIndexSequenceBound to compute worst case size)
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_encodeIndexSequence(* buffer, UIntPtr buffer_size, uint* indices, UIntPtr index_count);
 
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_encodeIndexSequenceBound(UIntPtr index_count, UIntPtr vertex_count);
 
 		/// <summary>
@@ -229,7 +229,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// The decoder is safe to use for untrusted input, but it may produce garbage data (e.g. out of range indices).
 		/// destination must contain enough space for the resulting index sequence (index_count elements)
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int meshopt_decodeIndexSequence(void* destination, UIntPtr index_count, UIntPtr index_size, * buffer, UIntPtr buffer_size);
 
 		/// <summary>
@@ -241,17 +241,17 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// For maximum efficiency the vertex buffer being encoded has to be quantized and optimized for locality of reference (cache/fetch) first.
 		/// buffer must contain enough space for the encoded vertex buffer (use meshopt_encodeVertexBufferBound to compute worst case size)
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_encodeVertexBuffer(* buffer, UIntPtr buffer_size, void* vertices, UIntPtr vertex_count, UIntPtr vertex_size);
 
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_encodeVertexBufferBound(UIntPtr vertex_count, UIntPtr vertex_size);
 
 		/// <summary>
 		/// Set vertex encoder format version
 		/// version must specify the data format version to encode; valid values are 0 (decodable by all library versions)
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_encodeVertexVersion(int version);
 
 		/// <summary>
@@ -261,7 +261,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// The decoder is safe to use for untrusted input, but it may produce garbage data.
 		/// destination must contain enough space for the resulting vertex buffer (vertex_count * vertex_size bytes)
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int meshopt_decodeVertexBuffer(void* destination, UIntPtr vertex_count, UIntPtr vertex_size, * buffer, UIntPtr buffer_size);
 
 		/// <summary>
@@ -280,22 +280,22 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// meshopt_decodeFilterExp decodes exponential encoding of floating-point data with 8-bit exponent and 24-bit integer mantissa as 2^E*M.
 		/// Each 32-bit component is decoded in isolation; stride must be divisible by 4.
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_decodeFilterOct(void* buffer, UIntPtr count, UIntPtr stride);
 
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_decodeFilterQuat(void* buffer, UIntPtr count, UIntPtr stride);
 
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_decodeFilterExp(void* buffer, UIntPtr count, UIntPtr stride);
 
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_encodeFilterOct(void* destination, UIntPtr count, UIntPtr stride, int bits, float* data);
 
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_encodeFilterQuat(void* destination, UIntPtr count, UIntPtr stride, int bits, float* data);
 
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_encodeFilterExp(void* destination, UIntPtr count, UIntPtr stride, int bits, float* data, meshopt_EncodeExpMode mode);
 
 		/// <summary>
@@ -312,7 +312,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// options must be a bitmask composed of meshopt_SimplifyX options; 0 is a safe default
 		/// result_error can be NULL; when it's not NULL, it will contain the resulting (relative) error after simplification
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_simplify(uint* destination, uint* indices, UIntPtr index_count, float* vertex_positions, UIntPtr vertex_count, UIntPtr vertex_positions_stride, UIntPtr target_index_count, float target_error, uint options, float* result_error);
 
 		/// <summary>
@@ -326,7 +326,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// = 32
 		/// vertex_lock can be NULL; when it's not NULL, it should have a value for each vertex; 1 denotes vertices that can't be moved
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_simplifyWithAttributes(uint* destination, uint* indices, UIntPtr index_count, float* vertex_positions, UIntPtr vertex_count, UIntPtr vertex_positions_stride, float* vertex_attributes, UIntPtr vertex_attributes_stride, float* attribute_weights, UIntPtr attribute_count, * vertex_lock, UIntPtr target_index_count, float target_error, uint options, float* result_error);
 
 		/// <summary>
@@ -341,7 +341,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// target_error represents the error relative to mesh extents that can be tolerated, e.g. 0.01 = 1% deformation; value range [0..1]
 		/// result_error can be NULL; when it's not NULL, it will contain the resulting (relative) error after simplification
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_simplifySloppy(uint* destination, uint* indices, UIntPtr index_count, float* vertex_positions, UIntPtr vertex_count, UIntPtr vertex_positions_stride, UIntPtr target_index_count, float target_error, float* result_error);
 
 		/// <summary>
@@ -355,7 +355,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// vertex_colors should can be NULL; when it's not NULL, it should have float3 color in the first 12 bytes of each vertex
 		/// color_weight determines relative priority of color wrt position; 1.0 is a safe default
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_simplifyPoints(uint* destination, float* vertex_positions, UIntPtr vertex_count, UIntPtr vertex_positions_stride, float* vertex_colors, UIntPtr vertex_colors_stride, float color_weight, UIntPtr target_vertex_count);
 
 		/// <summary>
@@ -363,7 +363,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// Absolute error must be *divided* by the scaling factor before passing it to meshopt_simplify as target_error
 		/// Relative error returned by meshopt_simplify via result_error must be *multiplied* by the scaling factor to get absolute error.
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern float meshopt_simplifyScale(float* vertex_positions, UIntPtr vertex_count, UIntPtr vertex_positions_stride);
 
 		/// <summary>
@@ -375,10 +375,10 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// destination must contain enough space for the target index buffer, worst case can be computed with meshopt_stripifyBound
 		/// restart_index should be 0xffff or 0xffffffff depending on index size, or 0 to use degenerate triangles
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_stripify(uint* destination, uint* indices, UIntPtr index_count, UIntPtr vertex_count, uint restart_index);
 
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_stripifyBound(UIntPtr index_count);
 
 		/// <summary>
@@ -387,10 +387,10 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// Returns the number of indices in the resulting list, with destination containing new index data
 		/// destination must contain enough space for the target index buffer, worst case can be computed with meshopt_unstripifyBound
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_unstripify(uint* destination, uint* indices, UIntPtr index_count, uint restart_index);
 
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_unstripifyBound(UIntPtr index_count);
 
 		/// <summary>
@@ -398,7 +398,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// Returns cache hit statistics using a simplified FIFO model
 		/// Results may not match actual GPU performance
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern meshopt_VertexCacheStatistics meshopt_analyzeVertexCache(uint* indices, UIntPtr index_count, UIntPtr vertex_count, uint cache_size, uint warp_size, uint primgroup_size);
 
 		/// <summary>
@@ -407,7 +407,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// Results may not match actual GPU performance
 		/// vertex_positions should have float3 position in the first 12 bytes of each vertex
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern meshopt_OverdrawStatistics meshopt_analyzeOverdraw(uint* indices, UIntPtr index_count, float* vertex_positions, UIntPtr vertex_count, UIntPtr vertex_positions_stride);
 
 		/// <summary>
@@ -415,7 +415,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// Returns cache hit statistics using a simplified direct mapped model
 		/// Results may not match actual GPU performance
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern meshopt_VertexFetchStatistics meshopt_analyzeVertexFetch(uint* indices, UIntPtr index_count, UIntPtr vertex_count, UIntPtr vertex_size);
 
 		/// <summary>
@@ -436,13 +436,13 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// = 512; max_triangles must be divisible by 4)
 		/// cone_weight should be set to 0 when cone culling is not used, and a value between 0 and 1 otherwise to balance between cluster size and cone culling efficiency
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_buildMeshlets(meshopt_Meshlet* meshlets, uint* meshlet_vertices, * meshlet_triangles, uint* indices, UIntPtr index_count, float* vertex_positions, UIntPtr vertex_count, UIntPtr vertex_positions_stride, UIntPtr max_vertices, UIntPtr max_triangles, float cone_weight);
 
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_buildMeshletsScan(meshopt_Meshlet* meshlets, uint* meshlet_vertices, * meshlet_triangles, uint* indices, UIntPtr index_count, UIntPtr vertex_count, UIntPtr max_vertices, UIntPtr max_triangles);
 
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UIntPtr meshopt_buildMeshletsBound(UIntPtr index_count, UIntPtr max_vertices, UIntPtr max_triangles);
 
 		/// <summary>
@@ -456,7 +456,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// <
 		/// = 512)
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_optimizeMeshlet(uint* meshlet_vertices, * meshlet_triangles, UIntPtr triangle_count, UIntPtr vertex_count);
 
 		/// <summary>
@@ -481,10 +481,10 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// <
 		/// = 512)
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern meshopt_Bounds meshopt_computeClusterBounds(uint* indices, UIntPtr index_count, float* vertex_positions, UIntPtr vertex_count, UIntPtr vertex_positions_stride);
 
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern meshopt_Bounds meshopt_computeMeshletBounds(uint* meshlet_vertices, * meshlet_triangles, UIntPtr triangle_count, float* vertex_positions, UIntPtr vertex_count, UIntPtr vertex_positions_stride);
 
 		/// <summary>
@@ -494,7 +494,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// destination must contain enough space for the resulting remap table (vertex_count elements)
 		/// vertex_positions should have float3 position in the first 12 bytes of each vertex
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_spatialSortRemap(uint* destination, float* vertex_positions, UIntPtr vertex_count, UIntPtr vertex_positions_stride);
 
 		/// <summary>
@@ -503,7 +503,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// destination must contain enough space for the resulting index buffer (index_count elements)
 		/// vertex_positions should have float3 position in the first 12 bytes of each vertex
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_spatialSortTriangles(uint* destination, uint* indices, UIntPtr index_count, float* vertex_positions, UIntPtr vertex_count, UIntPtr vertex_positions_stride);
 
 		/// <summary>
@@ -512,7 +512,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// Note that all algorithms only allocate memory for temporary use.
 		/// allocate/deallocate are always called in a stack-like order - last pointer to be allocated is deallocated first.
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_setAllocator( allocate,  deallocate);
 
 		/// <summary>
@@ -520,7 +520,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// Assumes reconstruction function (q / (2^N-1)), which is the case for fixed-function normalized fixed point conversion
 		/// Maximum reconstruction error: 1/2^(N+1)
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int meshopt_quantizeUnorm(float v, int N);
 
 		/// <summary>
@@ -528,7 +528,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// Assumes reconstruction function (q / (2^(N-1)-1)), which is the case for fixed-function normalized fixed point conversion (except early OpenGL versions)
 		/// Maximum reconstruction error: 1/2^N
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int meshopt_quantizeSnorm(float v, int N);
 
 		/// <summary>
@@ -537,7 +537,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// Representable magnitude range: [6e-5; 65504]
 		/// Maximum relative reconstruction error: 5e-4
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern ushort meshopt_quantizeHalf(float v);
 
 		/// <summary>
@@ -545,20 +545,20 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// Generates +-inf for overflow, preserves NaN, flushes denormals to zero, rounds to nearest
 		/// Assumes N is in a valid mantissa precision range, which is 1..23
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern float meshopt_quantizeFloat(float v, int N);
 
 		/// <summary>
 		/// Reverse quantization of a half-precision (as defined by IEEE-754 fp16) floating point value
 		/// Preserves Inf/NaN, flushes denormals to zero
 		/// </summary>
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern float meshopt_dequantizeHalf(ushort h);
 
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int meshopt_decodeIndexBuffer( destination, UIntPtr index_count, * buffer, UIntPtr buffer_size);
 
-		[DllImport("c-tinyusd", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int meshopt_decodeIndexSequence( destination, UIntPtr index_count, * buffer, UIntPtr buffer_size);
 
 	}
