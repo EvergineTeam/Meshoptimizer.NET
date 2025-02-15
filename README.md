@@ -1,4 +1,4 @@
-# OpenXR.NET
+# MeshOptimizer.NET
 
 This repository contains low-level bindings for MeshOptimizer used in Evergine.
 This binding is generated from the MeshOptimizer release:
