@@ -11,8 +11,8 @@ namespace Evergine.Bindings.MeshOptimizer
 	public unsafe struct meshopt_Stream
 	{
 		public void* data;
-		public UIntPtr size;
-		public UIntPtr stride;
+		public nuint size;
+		public nuint stride;
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
@@ -102,8 +102,8 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// <summary>
 		/// normal cone axis and cutoff, stored in 8-bit SNORM format; decode using x/127.0 
 		/// </summary>
-		public fixed char cone_axis_s8[3];
-		public char cone_cutoff_s8;
+		public fixed byte cone_axis_s8[3];
+		public byte cone_cutoff_s8;
 	}
 
 }

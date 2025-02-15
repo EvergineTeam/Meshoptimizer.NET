@@ -19,9 +19,37 @@ namespace MeshOptimizerGen
 
         public void Generate(CppCompilation compilation, string outputPath)
         {
+            GenerateConstants(compilation, outputPath);
             GenerateEnums(compilation, outputPath);
             GenerateStructs(compilation, outputPath);
             GenerateFuntions(compilation, outputPath);
+        }
+
+        private void GenerateConstants(CppCompilation compilation, string outputPath)
+        {
+            Debug.WriteLine("Generating Constants...");
+
+            using (StreamWriter file = File.CreateText(Path.Combine(outputPath, "Constants.cs")))
+            {
+                file.WriteLine("using System;");
+                file.WriteLine("using System.Runtime.InteropServices;\n");
+                file.WriteLine($"namespace Evergine.Bindings.MeshOptimizer");
+                file.WriteLine("{");
+                file.WriteLine($"\tpublic static partial class MeshOptNative");
+                file.WriteLine("\t{");
+
+                foreach (var cppMacro in compilation.Macros)
+                {
+                    if (string.IsNullOrEmpty(cppMacro.Value)
+                        || cppMacro.Name.Equals("MESHOPTIMIZER_ALLOC_CALLCONV")
+                        || cppMacro.Name.Equals("MESHOPTIMIZER_EXPERIMENTAL"))
+                        continue;
+
+                    string enumType = Helpers.ConvertEnumType(cppMacro.Value, out string csDataType);
+                    file.Write($"\t\tpublic const uint {cppMacro.Name} = {cppMacro.Value};\n");
+                }
+                file.WriteLine("\t}\n}");
+            }
         }
 
         public void GenerateEnums(CppCompilation compilation, string outputPath)
@@ -107,13 +135,6 @@ namespace MeshOptimizerGen
         {
             Debug.WriteLine("Generating Functions...");
 
-            // Hack to avoid compilation errors with duplicate functions.
-            // Remove duplicates based on name and number of parameters.
-            var functionsWithoutDuplicates = compilation.Functions
-                .GroupBy(f => (f.Name, f.Parameters.Count))
-                .Select(g => g.First())
-                .ToList();
-
             using (StreamWriter file = File.CreateText(Path.Combine(outputPath, "Funtions.cs")))
             {
                 file.WriteLine("using System;");
@@ -123,8 +144,12 @@ namespace MeshOptimizerGen
                 file.WriteLine($"\tpublic static unsafe partial class MeshOptNative");
                 file.WriteLine("\t{");
 
-                foreach (var cppFunction in functionsWithoutDuplicates)
+                foreach (var cppFunction in compilation.Functions)
                 {
+                    if ((cppFunction.Flags & CppFunctionFlags.FunctionTemplate) != CppFunctionFlags.None) continue;
+                    if ((cppFunction.Flags & CppFunctionFlags.Inline) != CppFunctionFlags.None) continue;
+                    if (cppFunction.Name == "meshopt_setAllocator") continue;
+
                     Helpers.PrintComments(file, cppFunction.Comment, "\t\t");
                     file.WriteLine($"\t\t[DllImport(\"meshoptimizer\", CallingConvention = CallingConvention.Cdecl)]");
                     string returnType = Helpers.ConvertToCSharpType(cppFunction.ReturnType);

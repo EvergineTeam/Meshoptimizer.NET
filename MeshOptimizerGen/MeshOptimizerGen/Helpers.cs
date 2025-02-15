@@ -10,10 +10,10 @@ namespace MeshOptimizerGen
 {
     public static class Helpers
     {
-        private static readonly Dictionary<string, string> s_csNameMappings = new Dictionary<string, string>()
+        private static readonly Dictionary<string, string> csNameMappings = new Dictionary<string, string>()
         {
+            { "bool", "bool" },
             { "uint8_t", "byte" },
-            { "c_tinyusd_half_t", "ushort" },
             { "uint16_t", "ushort" },
             { "uint32_t", "uint" },
             { "uint64_t", "ulong" },
@@ -23,8 +23,9 @@ namespace MeshOptimizerGen
             { "int64_t", "long" },
             { "int64_t*", "long*" },
             { "char", "byte" },
-            { "size_t", "UIntPtr" },
-            { "DWORD", "uint" },
+            { "size_t", "nuint" },
+            { "intptr_t", "nint" },
+            { "uintptr_t", "nuint" },
         };
 
         public static string ConvertToCSharpType(CppType type, bool isPointer = false)
@@ -51,7 +52,7 @@ namespace MeshOptimizerGen
             if (type is CppTypedef typedef)
             {
                 var originalName = typedef.Name;
-                s_csNameMappings.TryGetValue(originalName, out string typeDefCsName);
+                csNameMappings.TryGetValue(originalName, out string typeDefCsName);
 
                 if (isPointer)
                     return typeDefCsName + "*";
@@ -136,7 +137,7 @@ namespace MeshOptimizerGen
             if (type is CppTypedef typedef)
             {
                 var originalName = typedef.Name;
-                s_csNameMappings.TryGetValue(originalName, out string typeDefCsName);
+                csNameMappings.TryGetValue(originalName, out string typeDefCsName);
                 if (isPointer)
                     return typeDefCsName + "*";
 
@@ -179,6 +180,8 @@ namespace MeshOptimizerGen
                     result = "bool";
                     break;
                 case CppPrimitiveKind.Char:
+                    result = "byte";
+                    break;
                 case CppPrimitiveKind.WChar:
                     result = "char";
                     break;
@@ -201,9 +204,17 @@ namespace MeshOptimizerGen
                     result = "double";
                     break;
                 case CppPrimitiveKind.UnsignedChar:
+                    result = "byte";
+                    break;
                 case CppPrimitiveKind.LongLong:
+                    result = "double";
+                    break;
                 case CppPrimitiveKind.UnsignedLongLong:
+                    result = "ulong";
+                    break;
                 case CppPrimitiveKind.LongDouble:
+                    result = "double";
+                    break;
                 default:
                     break;
             }
@@ -264,7 +275,25 @@ namespace MeshOptimizerGen
                     return type;
             }
         }
-        internal static void PrintComments(StreamWriter file, CppComment comment, string tabs = "", bool newLine = false)
+
+        public static string ConvertEnumType(string value, out string csDataType)
+        {
+            if (value.StartsWith("(") && value.EndsWith(")"))
+            {
+                value = value.Substring(1, value.Length - 2);
+            }
+
+            csDataType = "uint";
+            if (value.EndsWith("ULL", StringComparison.OrdinalIgnoreCase))
+            {
+                csDataType = "ulong";
+                value = value.Replace("ULL", String.Empty);
+            }
+
+            return value.Replace("UL", String.Empty);
+        }
+
+        public static void PrintComments(StreamWriter file, CppComment comment, string tabs = "", bool newLine = false)
         {
             if (comment != null)
             {
