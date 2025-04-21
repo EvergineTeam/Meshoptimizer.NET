@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35527.113 d17.12
+VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeshOptimizerGen", "MeshOptimizerGen\MeshOptimizerGen.csproj", "{0D82ED10-94CF-4B71-9785-805791891310}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Evergine.Bindings.MeshOptimizer", "Evergine.Bindings.Meshoptimizer\Evergine.Bindings.MeshOptimizer.csproj", "{638B3B0B-F7CD-4875-85B6-0F7B4E4752D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloMeshlets", "HelloMeshlets\HelloMeshlets.csproj", "{A91B1097-9283-12CC-FAE4-3139A9A177FE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{638B3B0B-F7CD-4875-85B6-0F7B4E4752D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{638B3B0B-F7CD-4875-85B6-0F7B4E4752D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{638B3B0B-F7CD-4875-85B6-0F7B4E4752D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A91B1097-9283-12CC-FAE4-3139A9A177FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A91B1097-9283-12CC-FAE4-3139A9A177FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A91B1097-9283-12CC-FAE4-3139A9A177FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A91B1097-9283-12CC-FAE4-3139A9A177FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
