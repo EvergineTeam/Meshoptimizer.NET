@@ -2,7 +2,7 @@
 
 This repository contains low-level bindings for MeshOptimizer used in Evergine.
 This binding is generated from the MeshOptimizer release:
-https://github.com/zeux/meshoptimizer/releases/tag/v0.22
+https://github.com/zeux/meshoptimizer/releases/tag/v0.23
 
 [![CI](https://github.com/EvergineTeam/Meshoptimizer.NET/actions/workflows/CI.yml/badge.svg)](https://github.com/EvergineTeam/Meshoptimizer.NET/actions/workflows/CI.yml)
 [![CD](https://github.com/EvergineTeam/Meshoptimizer.NET/actions/workflows/CD.yml/badge.svg)](https://github.com/EvergineTeam/Meshoptimizer.NET/actions/workflows/CD.yml)
