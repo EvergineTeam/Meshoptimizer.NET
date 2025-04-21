@@ -14,7 +14,7 @@ namespace HelloMeshlets
             uint meshIndices = 67164;
 
             // 1084
-            uint maxMeshlets = (uint)MeshOptNative.meshopt_buildMeshletsBound(meshIndices, kMaxVertices, kMaxTriangles);            
+            uint maxMeshlets = MeshOptNative.meshopt_buildMeshletsBound(meshIndices, kMaxVertices, kMaxTriangles);    
             
         }
     }

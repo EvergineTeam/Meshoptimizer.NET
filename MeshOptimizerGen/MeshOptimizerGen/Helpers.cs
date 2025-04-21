@@ -23,7 +23,7 @@ namespace MeshOptimizerGen
             { "int64_t", "long" },
             { "int64_t*", "long*" },
             { "char", "byte" },
-            { "size_t", "nuint" },
+            { "size_t", "uint" },
             { "intptr_t", "nint" },
             { "uintptr_t", "nuint" },
         };
