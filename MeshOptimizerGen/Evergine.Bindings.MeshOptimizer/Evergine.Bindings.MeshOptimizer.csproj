@@ -1,11 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<Copyright>Copyright (c) Evergine 2025</Copyright>
+		<Authors>Evergine Team</Authors>
+		<Company>Plain Concepts</Company>
+		<Description>Low-level bindings for MeshOptimizer used in Evergine</Description>
+		<RepositoryUrl>https://github.com/EvergineTeam/Meshoptimizer.NET</RepositoryUrl>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<Folder Include="Generated\" />
