@@ -44,7 +44,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		meshopt_EncodeExpSharedComponent = 2,
 
 		/// <summary>
-		/// Experimental: When encoding exponents, use separate values for each component, but clamp to 0 (good quality if very small values are not important) 
+		/// When encoding exponents, use separate values for each component, but clamp to 0 (good quality if very small values are not important) 
 		/// </summary>
 		meshopt_EncodeExpClamped = 3,
 	}

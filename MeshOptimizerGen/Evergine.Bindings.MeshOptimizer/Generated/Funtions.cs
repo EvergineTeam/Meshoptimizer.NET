@@ -210,6 +210,14 @@ namespace Evergine.Bindings.MeshOptimizer
 		public static extern int meshopt_decodeIndexBuffer(void* destination, uint index_count, uint index_size, byte* buffer, uint buffer_size);
 
 		/// <summary>
+		/// Get encoded index format version
+		/// Returns format version of the encoded index buffer/sequence, or -1 if the buffer header is invalid
+		/// Note that a non-negative value doesn't guarantee that the buffer will be decoded correctly if the input is malformed.
+		/// </summary>
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int meshopt_decodeIndexVersion(byte* buffer, uint buffer_size);
+
+		/// <summary>
 		/// Index sequence encoder
 		/// Encodes index sequence into an array of bytes that is generally smaller and compresses better compared to original.
 		/// Input index sequence can represent arbitrary topology; for triangle lists meshopt_encodeIndexBuffer is likely to be better.
@@ -248,8 +256,18 @@ namespace Evergine.Bindings.MeshOptimizer
 		public static extern uint meshopt_encodeVertexBufferBound(uint vertex_count, uint vertex_size);
 
 		/// <summary>
+		/// Experimental: Vertex buffer encoder
+		/// Encodes vertex data just like meshopt_encodeVertexBuffer, but allows to override compression level.
+		/// For compression level to take effect, the vertex encoding version must be set to 1 via meshopt_encodeVertexVersion.
+		/// The default compression level implied by meshopt_encodeVertexBuffer is 2.
+		/// level should be in the range [0, 3] with 0 being the fastest and 3 being the slowest and producing the best compression ratio.
+		/// </summary>
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
+		public static extern uint meshopt_encodeVertexBufferLevel(byte* buffer, uint buffer_size, void* vertices, uint vertex_count, uint vertex_size, int level);
+
+		/// <summary>
 		/// Set vertex encoder format version
-		/// version must specify the data format version to encode; valid values are 0 (decodable by all library versions)
+		/// version must specify the data format version to encode; valid values are 0 (decodable by all library versions) and 1 (decodable by 0.23+)
 		/// </summary>
 		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void meshopt_encodeVertexVersion(int version);
@@ -263,6 +281,14 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// </summary>
 		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int meshopt_decodeVertexBuffer(void* destination, uint vertex_count, uint vertex_size, byte* buffer, uint buffer_size);
+
+		/// <summary>
+		/// Get encoded vertex format version
+		/// Returns format version of the encoded vertex buffer, or -1 if the buffer header is invalid
+		/// Note that a non-negative value doesn't guarantee that the buffer will be decoded correctly if the input is malformed.
+		/// </summary>
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int meshopt_decodeVertexVersion(byte* buffer, uint buffer_size);
 
 		/// <summary>
 		/// Vertex buffer filters
@@ -316,7 +342,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		public static extern uint meshopt_simplify(uint* destination, uint* indices, uint index_count, float* vertex_positions, uint vertex_count, uint vertex_positions_stride, uint target_index_count, float target_error, uint options, float* result_error);
 
 		/// <summary>
-		/// Experimental: Mesh simplifier with attribute metric
+		/// Mesh simplifier with attribute metric
 		/// The algorithm enhances meshopt_simplify by incorporating attribute values into the error metric used to prioritize simplification order; see meshopt_simplify documentation for details.
 		/// Note that the number of attributes affects memory requirements and running time; this algorithm requires ~1.5x more memory and time compared to meshopt_simplify when using 4 scalar attributes.
 		/// vertex_attributes should have attribute_count floats for each vertex
@@ -345,14 +371,14 @@ namespace Evergine.Bindings.MeshOptimizer
 		public static extern uint meshopt_simplifySloppy(uint* destination, uint* indices, uint index_count, float* vertex_positions, uint vertex_count, uint vertex_positions_stride, uint target_index_count, float target_error, float* result_error);
 
 		/// <summary>
-		/// Experimental: Point cloud simplifier
+		/// Point cloud simplifier
 		/// Reduces the number of points in the cloud to reach the given target
 		/// Returns the number of points after simplification, with destination containing new index data
 		/// The resulting index buffer references vertices from the original vertex buffer.
 		/// If the original vertex data isn't required, creating a compact vertex buffer using meshopt_optimizeVertexFetch is recommended.
 		/// destination must contain enough space for the target index buffer (target_vertex_count elements)
 		/// vertex_positions should have float3 position in the first 12 bytes of each vertex
-		/// vertex_colors should can be NULL; when it's not NULL, it should have float3 color in the first 12 bytes of each vertex
+		/// vertex_colors can be NULL; when it's not NULL, it should have float3 color in the first 12 bytes of each vertex
 		/// color_weight determines relative priority of color wrt position; 1.0 is a safe default
 		/// </summary>
 		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
@@ -431,7 +457,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// vertex_positions should have float3 position in the first 12 bytes of each vertex
 		/// max_vertices and max_triangles must not exceed implementation limits (max_vertices 
 		/// <
-		/// = 255 - not 256!, max_triangles 
+		/// = 256, max_triangles 
 		/// <
 		/// = 512; max_triangles must be divisible by 4)
 		/// cone_weight should be set to 0 when cone culling is not used, and a value between 0 and 1 otherwise to balance between cluster size and cone culling efficiency
@@ -446,13 +472,35 @@ namespace Evergine.Bindings.MeshOptimizer
 		public static extern uint meshopt_buildMeshletsBound(uint index_count, uint max_vertices, uint max_triangles);
 
 		/// <summary>
-		/// Experimental: Meshlet optimizer
+		/// Experimental: Meshlet builder with flexible cluster sizes
+		/// Splits the mesh into a set of meshlets, similarly to meshopt_buildMeshlets, but allows to specify minimum and maximum number of triangles per meshlet.
+		/// Clusters between min and max triangle counts are split when the cluster size would have exceeded the expected cluster size by more than split_factor.
+		/// Additionally, allows to switch to axis aligned clusters by setting cone_weight to a negative value.
+		/// meshlets must contain enough space for all meshlets, worst case size can be computed with meshopt_buildMeshletsBound using min_triangles (not max!)
+		/// meshlet_vertices must contain enough space for all meshlets, worst case size is equal to max_meshlets * max_vertices
+		/// meshlet_triangles must contain enough space for all meshlets, worst case size is equal to max_meshlets * max_triangles * 3
+		/// vertex_positions should have float3 position in the first 12 bytes of each vertex
+		/// max_vertices, min_triangles and max_triangles must not exceed implementation limits (max_vertices 
+		/// <
+		/// = 256, max_triangles 
+		/// <
+		/// = 512; min_triangles 
+		/// <
+		/// = max_triangles; both min_triangles and max_triangles must be divisible by 4)
+		/// cone_weight should be set to 0 when cone culling is not used, and a value between 0 and 1 otherwise to balance between cluster size and cone culling efficiency; additionally, cone_weight can be set to a negative value to prioritize axis aligned clusters (for raytracing) instead
+		/// split_factor should be set to a non-negative value; when greater than 0, clusters that have large bounds may be split unless they are under the min_triangles threshold
+		/// </summary>
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
+		public static extern uint meshopt_buildMeshletsFlex(meshopt_Meshlet* meshlets, uint* meshlet_vertices, byte* meshlet_triangles, uint* indices, uint index_count, float* vertex_positions, uint vertex_count, uint vertex_positions_stride, uint max_vertices, uint min_triangles, uint max_triangles, float cone_weight, float split_factor);
+
+		/// <summary>
+		/// Meshlet optimizer
 		/// Reorders meshlet vertices and triangles to maximize locality to improve rasterizer throughput
 		/// meshlet_triangles and meshlet_vertices must refer to meshlet triangle and vertex index data; when buildMeshlets* is used, these
 		/// need to be computed from meshlet's vertex_offset and triangle_offset
 		/// triangle_count and vertex_count must not exceed implementation limits (vertex_count 
 		/// <
-		/// = 255 - not 256!, triangle_count 
+		/// = 256, triangle_count 
 		/// <
 		/// = 512)
 		/// </summary>
@@ -486,6 +534,27 @@ namespace Evergine.Bindings.MeshOptimizer
 
 		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern meshopt_Bounds meshopt_computeMeshletBounds(uint* meshlet_vertices, byte* meshlet_triangles, uint triangle_count, float* vertex_positions, uint vertex_count, uint vertex_positions_stride);
+
+		/// <summary>
+		/// Experimental: Sphere bounds generator
+		/// Creates bounding sphere around a set of points or a set of spheres; returns the center and radius of the sphere, with other fields of the result set to 0.
+		/// positions should have float3 position in the first 12 bytes of each element
+		/// radii can be NULL; when it's not NULL, it should have a non-negative float radius in the first 4 bytes of each element
+		/// </summary>
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
+		public static extern meshopt_Bounds meshopt_computeSphereBounds(float* positions, uint count, uint positions_stride, float* radii, uint radii_stride);
+
+		/// <summary>
+		/// Experimental: Cluster partitioner
+		/// Partitions clusters into groups of similar size, prioritizing grouping clusters that share vertices.
+		/// destination must contain enough space for the resulting partiotion data (cluster_count elements)
+		/// destination[i] will contain the partition id for cluster i, with the total number of partitions returned by the function
+		/// cluster_indices should have the vertex indices referenced by each cluster, stored sequentially
+		/// cluster_index_counts should have the number of indices in each cluster; sum of all cluster_index_counts must be equal to total_index_count
+		/// target_partition_size is a target size for each partition, in clusters; the resulting partitions may be smaller or larger
+		/// </summary>
+		[DllImport("meshoptimizer", CallingConvention = CallingConvention.Cdecl)]
+		public static extern uint meshopt_partitionClusters(uint* destination, uint* cluster_indices, uint total_index_count, uint* cluster_index_counts, uint cluster_count, uint vertex_count, uint target_partition_size);
 
 		/// <summary>
 		/// Spatial sorter
