@@ -49,6 +49,7 @@ namespace HelloMeshlets
                 indices[i] = (uint)mesh.Indices[i].VertexIndex;
             }
 
+            // Create Meshlet array
             uint maxMeshlets = MeshOptNative.meshopt_buildMeshletsBound(meshNumIndices, kMaxVertices, kMaxTriangles);
 
             meshopt_Meshlet[] meshlets = new meshopt_Meshlet[maxMeshlets];
