@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Headers\meshoptimizer.h" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="Headers\meshoptimizer.h">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
