@@ -1,0 +1,102 @@
+# .github/workflows/meshoptimizer-cmake.yml
+name: Build meshoptimizer Libraries
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            arch: x64
+            cmake-arch: x64
+          - os: ubuntu-latest
+            arch: arm64
+            cmake-arch: aarch64
+          - os: windows-latest
+            arch: x64
+            cmake-arch: x64
+          - os: windows-latest
+            arch: arm64
+            cmake-arch: ARM64
+          - os: macos-latest
+            arch: arm64
+            cmake-arch: arm64
+
+    steps:
+      - name: Checkout meshoptimizer
+        uses: actions/checkout@v4
+        with:
+          repository: zeux/meshoptimizer
+          submodules: false
+
+      - name: Install dependencies on Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake
+
+      - name: Install Cross-Compilation Tools for ARM64
+        if: matrix.os == 'ubuntu-latest' && matrix.arch == 'arm64'
+        run: |
+          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+
+      - name: Configure meshoptimizer (Linux ARM64)
+        if: matrix.os == 'ubuntu-latest' && matrix.arch == 'arm64'
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DMESHOPT_BUILD_SHARED_LIBS=ON \
+            -DCMAKE_SYSTEM_NAME=Linux \
+            -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
+            -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc \
+            -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++
+
+      - name: Configure meshoptimizer (Linux x64)
+        if: matrix.os == 'ubuntu-latest' && matrix.arch == 'x64'
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DMESHOPT_BUILD_SHARED_LIBS=ON
+
+      - name: Configure meshoptimizer (macOS ARM64)
+        if: matrix.os == 'macos-latest'
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DMESHOPT_BUILD_SHARED_LIBS=ON \
+            -DCMAKE_OSX_ARCHITECTURES=${{ matrix.cmake-arch }}
+
+      - name: Configure meshoptimizer (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          cmake -S . -B build \
+            -A ${{ matrix.cmake-arch }} \
+            -DMESHOPT_BUILD_SHARED_LIBS=ON
+
+      - name: Build meshoptimizer
+        run: cmake --build build --config Release
+
+      - name: Upload meshoptimizer.dll (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: meshoptimizer-${{ matrix.arch }}-dll
+          path: build/**/*.dll
+
+      - name: Upload libmeshoptimizer.so (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: meshoptimizer-${{ matrix.arch }}-so
+          path: build/**/*.so
+
+      - name: Upload libmeshoptimizer.dylib (macOS)
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: meshoptimizer-${{ matrix.arch }}-dylib
+          path: build/**/*.dylib
