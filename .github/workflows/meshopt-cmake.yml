@@ -30,7 +30,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: zeux/meshoptimizer
-          submodules: false
 
       - name: Install dependencies on Ubuntu
         if: matrix.os == 'ubuntu-latest'
@@ -69,13 +68,13 @@ jobs:
             -DMESHOPT_BUILD_SHARED_LIBS=ON \
             -DCMAKE_OSX_ARCHITECTURES=${{ matrix.cmake-arch }}
 
-      - name: Configure meshoptimizer (Windows)
-         if: matrix.os == 'windows-latest'
-         shell: bash
-         run: |
-           cmake -S . -B build \
-             -A ${{ matrix.cmake-arch }} \
-             -DMESHOPT_BUILD_SHARED_LIBS=ON
+      - name: Configure meshoptimizer (Windows ARM & x64)
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: |
+          cmake -S . -B build \
+            -A ${{ matrix.cmake-arch }} \
+            -DMESHOPT_BUILD_SHARED_LIBS=ON
 
       - name: Build meshoptimizer
         run: cmake --build build --config Release
