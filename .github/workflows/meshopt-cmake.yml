@@ -1,4 +1,3 @@
-# .github/workflows/meshoptimizer-cmake.yml
 name: Build meshoptimizer Libraries
 
 on:
