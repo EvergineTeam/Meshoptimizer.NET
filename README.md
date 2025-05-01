@@ -27,3 +27,9 @@ Shadow indexing
 
 Go to the original repository for more details:
 https://github.com/zeux/meshoptimizer
+
+## Supported Platforms
+
+- [x] Windows x64, ARM64
+- [x] Linux x64, ARM64
+- [x] MacOS ARM64
