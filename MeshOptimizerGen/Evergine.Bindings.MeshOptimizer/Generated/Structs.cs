@@ -11,8 +11,8 @@ namespace Evergine.Bindings.MeshOptimizer
 	public unsafe struct meshopt_Stream
 	{
 		public void* data;
-		public uint size;
-		public uint stride;
+		public ulong size;
+		public ulong stride;
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
