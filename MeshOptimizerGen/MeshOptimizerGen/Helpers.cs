@@ -23,9 +23,9 @@ namespace MeshOptimizerGen
             { "int64_t", "long" },
             { "int64_t*", "long*" },
             { "char", "byte" },
-            { "size_t", "nuint" },
-            { "intptr_t", "nint" },
-            { "uintptr_t", "nuint" },
+            { "size_t", "UIntPtr" },
+            { "intptr_t", "IntPtr" },
+            { "uintptr_t", "UIntPtr" },
         };
 
         public static string ConvertToCSharpType(CppType type, bool isPointer = false)

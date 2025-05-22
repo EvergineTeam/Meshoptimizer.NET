@@ -41,17 +41,17 @@ namespace HelloMeshlets
             uint kMaxVertices = 64;
             uint kMaxTriangles = 124;
             float kConeWeight = 0.0f;
-            uint meshNumIndices = (uint)mesh.Indices.Count;
-            uint meshNumVertices = (uint)attrib.Vertices.Count;
+            UIntPtr meshNumIndices = (UIntPtr)mesh.Indices.Count;
+            UIntPtr meshNumVertices = (UIntPtr)attrib.Vertices.Count;
 
             uint[] indices = new uint[meshNumIndices];
-            for (int i = 0; i < meshNumIndices; i++)
+            for (int i = 0; i < (int)meshNumIndices; i++)
             {
                 indices[i] = (uint)mesh.Indices[i].VertexIndex;
             }
 
             // Create Meshlet array
-            uint maxMeshlets = MeshOptNative.meshopt_buildMeshletsBound(meshNumIndices, kMaxVertices, kMaxTriangles);
+            UIntPtr maxMeshlets = MeshOptNative.meshopt_buildMeshletsBound(meshNumIndices, kMaxVertices, kMaxTriangles);
 
             meshopt_Meshlet[] meshlets = new meshopt_Meshlet[maxMeshlets];
             uint[] meshletVertices = new uint[maxMeshlets * kMaxVertices];
@@ -64,7 +64,7 @@ namespace HelloMeshlets
             uint* pIndices = (uint*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(indices));
             float* pVertsAsFloats = (float*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(positions));
 
-            uint meshletCount = MeshOptNative.meshopt_buildMeshlets(
+            UIntPtr meshletCount = MeshOptNative.meshopt_buildMeshlets(
                                                                     pMeshlets,
                                                                     pMeshletVertices,
                                                                     pMeshletTriangles,

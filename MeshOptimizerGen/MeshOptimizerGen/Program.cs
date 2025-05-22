@@ -13,6 +13,10 @@ namespace MeshOptimizerGen
             var options = new CppParserOptions
             {
                 ParseMacros = true,
+                SystemIncludeFolders = {
+                    "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\ucrt",
+                    "C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.44.35207\\include"
+                },
             };
 
             var compilation = CppParser.ParseFile(headerFile, options);
