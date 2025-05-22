@@ -12,7 +12,7 @@ namespace MeshOptimizerGen
     {
         private static readonly Dictionary<string, string> csNameMappings = new Dictionary<string, string>()
         {
-            { "bool", "bool" },
+            { "bool", "byte" },
             { "uint8_t", "byte" },
             { "uint16_t", "ushort" },
             { "uint32_t", "uint" },
@@ -23,9 +23,9 @@ namespace MeshOptimizerGen
             { "int64_t", "long" },
             { "int64_t*", "long*" },
             { "char", "byte" },
-            { "size_t", "uint" },
-            { "intptr_t", "nint" },
-            { "uintptr_t", "nuint" },
+            { "size_t", "UIntPtr" },
+            { "intptr_t", "IntPtr" },
+            { "uintptr_t", "UIntPtr" },
         };
 
         public static string ConvertToCSharpType(CppType type, bool isPointer = false)
