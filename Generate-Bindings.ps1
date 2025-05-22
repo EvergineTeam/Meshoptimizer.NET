@@ -13,7 +13,7 @@
 param (
 	[string]$buildVerbosity = "normal",
 	[string]$buildConfiguration = "Release",
-	[string]$tinyUSDGenCsprojPath = "MeshOptimizerGen\MeshOptimizerGen\MeshOptimizerGen.csproj"
+	[string]$csprojPath = "MeshOptimizerGen\MeshOptimizerGen\MeshOptimizerGen.csproj"
 )
 
 # Utility functions
@@ -29,7 +29,7 @@ LogDebug "#######################################"
 
 # Compile generator
 LogDebug "START generator build process"
-dotnet publish -v:$buildVerbosity -p:Configuration=$buildConfiguration $tinyUSDGenCsprojPath
+dotnet publish -v:$buildVerbosity -p:Configuration=$buildConfiguration $csprojPath
 if($?)
 {
    LogDebug "END generator build process"

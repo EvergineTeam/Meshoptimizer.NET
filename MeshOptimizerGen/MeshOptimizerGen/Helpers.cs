@@ -12,7 +12,7 @@ namespace MeshOptimizerGen
     {
         private static readonly Dictionary<string, string> csNameMappings = new Dictionary<string, string>()
         {
-            { "bool", "bool" },
+            { "bool", "byte" },
             { "uint8_t", "byte" },
             { "uint16_t", "ushort" },
             { "uint32_t", "uint" },
@@ -23,7 +23,7 @@ namespace MeshOptimizerGen
             { "int64_t", "long" },
             { "int64_t*", "long*" },
             { "char", "byte" },
-            { "size_t", "UInt64" },
+            { "size_t", "nuint" },
             { "intptr_t", "nint" },
             { "uintptr_t", "nuint" },
         };
