@@ -20,13 +20,13 @@ on:
 
 jobs:
   ci:
-    uses: EvergineTeam/evergine-standards/.github/workflows/binding-common-ci.yml@main
+    uses: EvergineTeam/evergine-standards/.github/workflows/binding-common-ci.yml@v2
     with:
       generator-project: "MeshOptimizerGen/MeshOptimizerGen/MeshOptimizerGen.csproj"  # Path to your generator .csproj
       generator-name: "MeshOptimizer"                # Name of your generator executable
       binding-project: "MeshOptimizerGen/Evergine.Bindings.MeshOptimizer/Evergine.Bindings.MeshOptimizer.csproj" # Path to your binding .csproj
       target-framework: "net8.0"                   # Target framework for generator/binding
-      runtime-identifier: "win-x64"                # Runtime identifier (win-x64, linux-x64, etc.)
+      runtime-identifier: "linux-x64"                # Runtime identifier (win-x64, linux-x64, etc.)
       build-configuration: "Release"               # Build configuration (Release, Debug, etc.)
       nuget-artifacts: ${{ inputs.publish-artifacts || false }}  # Upload NuGets as workflow artifacts
       revision: ${{ github.run_number }}           # Revision for date-based version (bindings style). Use with bindings.
