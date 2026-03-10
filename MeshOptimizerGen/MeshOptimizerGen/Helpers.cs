@@ -74,6 +74,11 @@ namespace MeshOptimizerGen
                 return GetCsTypeName(pointerType);
             }
 
+            if (type is CppFunctionType functionType)
+            {
+                return GetCsFunctionPointerType(functionType);
+            }
+
             if (type is CppArrayType arrayType)
             {
                 return GetCsTypeName(arrayType.ElementType, isPointer);
@@ -108,6 +113,11 @@ namespace MeshOptimizerGen
                 }
 
                 return GetCsTypeName(qualifiedType.ElementType, true);
+            }
+
+            if (pointerType.ElementType is CppFunctionType functionType)
+            {
+                return GetCsFunctionPointerType(functionType);
             }
 
             return GetCsTypeName(pointerType.ElementType, true);
@@ -157,6 +167,11 @@ namespace MeshOptimizerGen
             if (type is CppPointerType pointerType)
             {
                 return GetCsTypeName(pointerType);
+            }
+
+            if (type is CppFunctionType functionType)
+            {
+                return GetCsFunctionPointerType(functionType);
             }
 
             if (type is CppArrayType arrayType)
@@ -225,6 +240,22 @@ namespace MeshOptimizerGen
             }
 
             return result;
+        }
+
+        private static string GetCsFunctionPointerType(CppFunctionType functionType)
+        {
+            var sb = new StringBuilder("delegate* unmanaged[Cdecl]<");
+
+            foreach (var param in functionType.Parameters)
+            {
+                sb.Append(ConvertToCSharpType(param.Type));
+                sb.Append(", ");
+            }
+
+            sb.Append(ConvertToCSharpType(functionType.ReturnType));
+            sb.Append(">");
+
+            return sb.ToString();
         }
 
         public enum Family

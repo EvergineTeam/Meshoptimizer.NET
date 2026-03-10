@@ -33,6 +33,17 @@ namespace Evergine.Bindings.MeshOptimizer
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
+	public unsafe struct meshopt_VertexFetchStatistics
+	{
+		public uint bytes_fetched;
+
+		/// <summary>
+		/// fetched bytes / vertex buffer size; best case 1.0 (each byte is fetched once) 
+		/// </summary>
+		public float overfetch;
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
 	public unsafe struct meshopt_OverdrawStatistics
 	{
 		public uint pixels_covered;
@@ -45,14 +56,14 @@ namespace Evergine.Bindings.MeshOptimizer
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
-	public unsafe struct meshopt_VertexFetchStatistics
+	public unsafe struct meshopt_CoverageStatistics
 	{
-		public uint bytes_fetched;
+		public fixed float coverage[3];
 
 		/// <summary>
-		/// fetched bytes / vertex buffer size; best case 1.0 (each byte is fetched once) 
+		/// viewport size in mesh coordinates 
 		/// </summary>
-		public float overfetch;
+		public float extent;
 	}
 
 	/// <summary>
@@ -72,7 +83,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		public uint triangle_offset;
 
 		/// <summary>
-		/// number of vertices and triangles used in the meshlet; data is stored in consecutive range defined by offset and count 
+		/// number of vertices and triangles used in the meshlet; data is stored in consecutive range [offset..offset+count) for vertices and [offset..offset+count*3) for triangles 
 		/// </summary>
 		public uint vertex_count;
 		public uint triangle_count;
