@@ -27,7 +27,16 @@ namespace MeshOptimizerGen
             }
             else
             {
-                string outputPath = "..\\..\\..\\..\\..\\Evergine.Bindings.MeshOptimizer\\Generated";
+                string outputPath = Path.Combine(
+                    AppContext.BaseDirectory,
+                    "..", "..", "..", "..", "..",
+                    "Evergine.Bindings.MeshOptimizer", "Generated");
+
+                outputPath = Path.GetFullPath(outputPath);
+
+                if (!Directory.Exists(outputPath))
+                    Directory.CreateDirectory(outputPath);
+
                 CsCodeGenerator.Instance.Generate(compilation, outputPath);
             }
         }

@@ -8,62 +8,62 @@ namespace Evergine.Bindings.MeshOptimizer
 	/// Each element takes size bytes, beginning at data, with stride controlling the spacing between successive elements (stride >= size).
 	/// </summary>
 	[StructLayout(LayoutKind.Sequential)]
-	public unsafe struct meshopt_Stream
+	public unsafe struct Stream
 	{
-		public void* data;
-		public UIntPtr size;
-		public UIntPtr stride;
+		public void* Data;
+		public nuint Size;
+		public nuint Stride;
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
-	public unsafe struct meshopt_VertexCacheStatistics
+	public unsafe struct VertexCacheStatistics
 	{
-		public uint vertices_transformed;
-		public uint warps_executed;
+		public uint VerticesTransformed;
+		public uint WarpsExecuted;
 
 		/// <summary>
 		/// transformed vertices / triangle count; best case 0.5, worst case 3.0, optimum depends on topology 
 		/// </summary>
-		public float acmr;
+		public float Acmr;
 
 		/// <summary>
 		/// transformed vertices / vertex count; best case 1.0, worst case 6.0, optimum is 1.0 (each vertex is transformed once) 
 		/// </summary>
-		public float atvr;
+		public float Atvr;
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
-	public unsafe struct meshopt_VertexFetchStatistics
+	public unsafe struct VertexFetchStatistics
 	{
-		public uint bytes_fetched;
+		public uint BytesFetched;
 
 		/// <summary>
 		/// fetched bytes / vertex buffer size; best case 1.0 (each byte is fetched once) 
 		/// </summary>
-		public float overfetch;
+		public float Overfetch;
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
-	public unsafe struct meshopt_OverdrawStatistics
+	public unsafe struct OverdrawStatistics
 	{
-		public uint pixels_covered;
-		public uint pixels_shaded;
+		public uint PixelsCovered;
+		public uint PixelsShaded;
 
 		/// <summary>
 		/// shaded pixels / covered pixels; best case 1.0 
 		/// </summary>
-		public float overdraw;
+		public float Overdraw;
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
-	public unsafe struct meshopt_CoverageStatistics
+	public unsafe struct CoverageStatistics
 	{
-		public fixed float coverage[3];
+		public fixed float Coverage[3];
 
 		/// <summary>
 		/// viewport size in mesh coordinates 
 		/// </summary>
-		public float extent;
+		public float Extent;
 	}
 
 	/// <summary>
@@ -73,48 +73,48 @@ namespace Evergine.Bindings.MeshOptimizer
 	/// For efficiency, meshlet triangles and vertices are packed into two large arrays; this structure contains offsets and counts to access the data.
 	/// </summary>
 	[StructLayout(LayoutKind.Sequential)]
-	public unsafe struct meshopt_Meshlet
+	public unsafe struct Meshlet
 	{
 
 		/// <summary>
 		/// offsets within meshlet_vertices and meshlet_triangles arrays with meshlet data 
 		/// </summary>
-		public uint vertex_offset;
-		public uint triangle_offset;
+		public uint VertexOffset;
+		public uint TriangleOffset;
 
 		/// <summary>
 		/// number of vertices and triangles used in the meshlet; data is stored in consecutive range [offset..offset+count) for vertices and [offset..offset+count*3) for triangles 
 		/// </summary>
-		public uint vertex_count;
-		public uint triangle_count;
+		public uint VertexCount;
+		public uint TriangleCount;
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
-	public unsafe struct meshopt_Bounds
+	public unsafe struct Bounds
 	{
 
 		/// <summary>
 		/// bounding sphere, useful for frustum and occlusion culling 
 		/// </summary>
-		public fixed float center[3];
-		public float radius;
+		public fixed float Center[3];
+		public float Radius;
 
 		/// <summary>
 		/// normal cone, useful for backface culling 
 		/// </summary>
-		public fixed float cone_apex[3];
-		public fixed float cone_axis[3];
+		public fixed float ConeApex[3];
+		public fixed float ConeAxis[3];
 
 		/// <summary>
 		/// = cos(angle/2) 
 		/// </summary>
-		public float cone_cutoff;
+		public float ConeCutoff;
 
 		/// <summary>
 		/// normal cone axis and cutoff, stored in 8-bit SNORM format; decode using x/127.0 
 		/// </summary>
-		public fixed byte cone_axis_s8[3];
-		public byte cone_cutoff_s8;
+		public fixed byte ConeAxisS8[3];
+		public byte ConeCutoffS8;
 	}
 
 }

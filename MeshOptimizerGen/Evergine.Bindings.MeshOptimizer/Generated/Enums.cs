@@ -34,28 +34,84 @@ namespace Evergine.Bindings.MeshOptimizer
 	/// Each component is stored as an 8-bit or 16-bit integer; stride must be equal to 4 or 8.
 	/// Input data must contain 4 floats for every color (count*4 total).
 	/// </summary>
-	public enum meshopt_EncodeExpMode
+	public enum EncodeExpMode
 	{
 
 		/// <summary>
 		/// When encoding exponents, use separate values for each component (maximum quality) 
 		/// </summary>
-		meshopt_EncodeExpSeparate = 0,
+		Separate = 0,
 
 		/// <summary>
 		/// When encoding exponents, use shared value for all components of each vector (better compression) 
 		/// </summary>
-		meshopt_EncodeExpSharedVector = 1,
+		SharedVector = 1,
 
 		/// <summary>
 		/// When encoding exponents, use shared value for each component of all vectors (best compression) 
 		/// </summary>
-		meshopt_EncodeExpSharedComponent = 2,
+		SharedComponent = 2,
 
 		/// <summary>
 		/// When encoding exponents, use separate values for each component, but clamp to 0 (good quality if very small values are not important) 
 		/// </summary>
-		meshopt_EncodeExpClamped = 3,
+		Clamped = 3,
+	}
+
+	/// <summary>
+	/// Simplification options
+	/// </summary>
+	[Flags]
+	public enum SimplifyOptions : uint
+	{
+
+		/// <summary>
+		/// Do not move vertices that are located on the topological border (vertices on triangle edges that don't have a paired triangle). Useful for simplifying portions of the larger mesh. 
+		/// </summary>
+		LockBorder = 1,
+
+		/// <summary>
+		/// Improve simplification performance assuming input indices are a sparse subset of the mesh. Note that error becomes relative to subset extents. 
+		/// </summary>
+		Sparse = 2,
+
+		/// <summary>
+		/// Treat error limit and resulting error as absolute instead of relative to mesh extents. 
+		/// </summary>
+		ErrorAbsolute = 4,
+
+		/// <summary>
+		/// Remove disconnected parts of the mesh during simplification incrementally, regardless of the topological restrictions inside components. 
+		/// </summary>
+		Prune = 8,
+
+		/// <summary>
+		/// Produce more regular triangle sizes and shapes during simplification, at some cost to geometric and attribute quality. 
+		/// </summary>
+		Regularize = 16,
+
+		/// <summary>
+		/// Experimental: Allow collapses across attribute discontinuities, except for vertices that are tagged with meshopt_SimplifyVertex_Protect in vertex_lock. 
+		/// </summary>
+		Permissive = 32,
+	}
+
+	/// <summary>
+	/// Experimental: Simplification vertex flags/locks, for use in `vertex_lock` arrays in simplification APIs
+	/// </summary>
+	[Flags]
+	public enum SimplifyVertexOptions : uint
+	{
+
+		/// <summary>
+		/// Do not move this vertex. 
+		/// </summary>
+		Lock = 1,
+
+		/// <summary>
+		/// Protect attribute discontinuity at this vertex; must be used together with meshopt_SimplifyPermissive option. 
+		/// </summary>
+		Protect = 2,
 	}
 
 }

@@ -16,7 +16,7 @@ namespace HelloMeshlets
         public unsafe static void Main(string[] args)
         {
             // This will not be needed when we use a nuget package
-            NativeLibrary.SetDllImportResolver(typeof(Evergine.Bindings.MeshOptimizer.meshopt_Bounds).Assembly, ResolveRuntimes);
+            NativeLibrary.SetDllImportResolver(typeof(Evergine.Bindings.MeshOptimizer.Bounds).Assembly, ResolveRuntimes);
 
             Console.WriteLine("Hello, Meshlets!");
 
@@ -41,8 +41,8 @@ namespace HelloMeshlets
             uint kMaxVertices = 64;
             uint kMaxTriangles = 124;
             float kConeWeight = 0.0f;
-            UIntPtr meshNumIndices = (UIntPtr)mesh.Indices.Count;
-            UIntPtr meshNumVertices = (UIntPtr)attrib.Vertices.Count;
+            nuint meshNumIndices = (nuint)mesh.Indices.Count;
+            nuint meshNumVertices = (nuint)attrib.Vertices.Count;
 
             uint[] indices = new uint[meshNumIndices];
             for (int i = 0; i < (int)meshNumIndices; i++)
@@ -51,20 +51,20 @@ namespace HelloMeshlets
             }
 
             // Create Meshlet array
-            UIntPtr maxMeshlets = MeshOptNative.meshopt_buildMeshletsBound(meshNumIndices, kMaxVertices, kMaxTriangles);
+            nuint maxMeshlets = MeshOptimizer.BuildMeshletsBound(meshNumIndices, kMaxVertices, kMaxTriangles);
 
-            meshopt_Meshlet[] meshlets = new meshopt_Meshlet[maxMeshlets];
+            Meshlet[] meshlets = new Meshlet[maxMeshlets];
             uint[] meshletVertices = new uint[maxMeshlets * kMaxVertices];
             byte[] meshletTriangles = new byte[maxMeshlets * kMaxTriangles * 3];
             Vector3[] positions = attrib.Vertices.ToArray();
 
-            meshopt_Meshlet* pMeshlets = (meshopt_Meshlet*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(meshlets));
+            Meshlet* pMeshlets = (Meshlet*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(meshlets));
             uint* pMeshletVertices = (uint*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(meshletVertices));
             byte* pMeshletTriangles = (byte*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(meshletTriangles));
             uint* pIndices = (uint*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(indices));
             float* pVertsAsFloats = (float*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(positions));
 
-            UIntPtr meshletCount = MeshOptNative.meshopt_buildMeshlets(
+            nuint meshletCount = MeshOptimizer.BuildMeshlets(
                                                                     pMeshlets,
                                                                     pMeshletVertices,
                                                                     pMeshletTriangles,
@@ -72,14 +72,14 @@ namespace HelloMeshlets
                                                                     meshNumIndices,
                                                                     pVertsAsFloats,
                                                                     meshNumVertices,
-                                                                    (uint)sizeof(Vector3),
+                                                                    (nuint)sizeof(Vector3),
                                                                     kMaxVertices,
                                                                     kMaxTriangles,
                                                                     kConeWeight);
 
             var last = meshlets[meshletCount - 1];
-            Array.Resize(ref meshletVertices, (int)(last.vertex_offset + last.vertex_count));
-            Array.Resize(ref meshletTriangles, (int)(last.triangle_offset + ((last.triangle_count * 3 + 3) & ~3)));
+            Array.Resize(ref meshletVertices, (int)(last.VertexOffset + last.VertexCount));
+            Array.Resize(ref meshletTriangles, (int)(last.TriangleOffset + ((last.TriangleCount * 3 + 3) & ~3)));
             Array.Resize(ref meshlets, (int)meshletCount);            
 
             Console.WriteLine($"{meshletCount} meshlets generated");

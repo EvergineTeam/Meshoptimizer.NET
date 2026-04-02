@@ -10,6 +10,8 @@ namespace MeshOptimizerGen
 {
     public static class Helpers
     {
+        public static List<string> TypedefList = new List<string>();
+
         private static readonly Dictionary<string, string> csNameMappings = new Dictionary<string, string>()
         {
             { "bool", "byte" },
@@ -23,9 +25,9 @@ namespace MeshOptimizerGen
             { "int64_t", "long" },
             { "int64_t*", "long*" },
             { "char", "byte" },
-            { "size_t", "UIntPtr" },
-            { "intptr_t", "IntPtr" },
-            { "uintptr_t", "UIntPtr" },
+            { "size_t", "nuint" },
+            { "intptr_t", "nint" },
+            { "uintptr_t", "nuint" },
         };
 
         public static string ConvertToCSharpType(CppType type, bool isPointer = false)
@@ -42,7 +44,7 @@ namespace MeshOptimizerGen
 
             if (type is CppEnum enumType)
             {
-                var enumCsName = enumType.Name;
+                var enumCsName = GetCsCleanName(enumType.Name);
                 if (isPointer)
                     return enumCsName + "*";
 
@@ -54,6 +56,9 @@ namespace MeshOptimizerGen
                 var originalName = typedef.Name;
                 csNameMappings.TryGetValue(originalName, out string typeDefCsName);
 
+                if (typeDefCsName == null)
+                    typeDefCsName = GetCsCleanName(originalName);
+
                 if (isPointer)
                     return typeDefCsName + "*";
 
@@ -62,7 +67,7 @@ namespace MeshOptimizerGen
 
             if (type is CppClass @class)
             {
-                var className = @class.Name;
+                var className = StripPrefix(@class.Name);
                 if (isPointer)
                     return className + "*";
 
@@ -137,7 +142,7 @@ namespace MeshOptimizerGen
 
             if (type is CppEnum enumType)
             {
-                var enumCsName = enumType.Name;
+                var enumCsName = GetCsCleanName(enumType.Name);
                 if (isPointer)
                     return enumCsName + "*";
 
@@ -148,6 +153,10 @@ namespace MeshOptimizerGen
             {
                 var originalName = typedef.Name;
                 csNameMappings.TryGetValue(originalName, out string typeDefCsName);
+
+                if (typeDefCsName == null)
+                    typeDefCsName = GetCsCleanName(originalName);
+
                 if (isPointer)
                     return typeDefCsName + "*";
 
@@ -156,7 +165,7 @@ namespace MeshOptimizerGen
 
             if (type is CppClass @class)
             {
-                var className = @class.Name;
+                var className = StripPrefix(@class.Name);
 
                 if (isPointer)
                     className += "*";
@@ -222,7 +231,7 @@ namespace MeshOptimizerGen
                     result = "byte";
                     break;
                 case CppPrimitiveKind.LongLong:
-                    result = "double";
+                    result = "long";
                     break;
                 case CppPrimitiveKind.UnsignedLongLong:
                     result = "ulong";
@@ -258,6 +267,26 @@ namespace MeshOptimizerGen
             return sb.ToString();
         }
 
+        public static string GetCsCleanName(string name)
+        {
+            if (name.StartsWith("PFN"))
+                return "IntPtr";
+
+            if (name.EndsWith("Flags"))
+            {
+                var stripped = name.Substring(0, name.Length - "Flags".Length);
+                return StripPrefix(stripped);
+            }
+
+            if (TypedefList.Contains(name))
+                return "IntPtr";
+
+            if (csNameMappings.TryGetValue(name, out string mappedName))
+                return mappedName;
+
+            return StripPrefix(name);
+        }
+
         public enum Family
         {
             param,
@@ -273,7 +302,7 @@ namespace MeshOptimizerGen
                     switch (family)
                     {
                         case Family.param:
-                            return "[MarshalAs(UnmanagedType.Bool)] bool";
+                            return "[MarshalAs(UnmanagedType.I1)] bool";
                         case Family.ret:
                             return "bool";
                         case Family.field:
@@ -281,15 +310,7 @@ namespace MeshOptimizerGen
                             return "byte";
                     }
                 case "bool*":
-                    switch (family)
-                    {
-                        case Family.ret:
-                            return "bool";
-                        case Family.param:
-                        case Family.field:
-                        default:
-                            return "byte*";
-                    }
+                    return "byte*";
                 case "char*":
                 case "unsigned char*":
                     switch (family)
@@ -297,7 +318,7 @@ namespace MeshOptimizerGen
                         case Family.param:
                             return "[MarshalAs(UnmanagedType.LPStr)] string";
                         case Family.ret:
-                            return "string";
+                            return "byte*";
                         case Family.field:
                         default:
                             return "byte*";
@@ -322,6 +343,236 @@ namespace MeshOptimizerGen
             }
 
             return value.Replace("UL", String.Empty);
+        }
+
+        /// <summary>
+        /// Strip the meshoptimizer-specific C prefix from a name.
+        /// Handles: meshopt_, MESHOPTIMIZER_, meshopt (for PascalCase-style names).
+        /// </summary>
+        public static string StripPrefix(string name)
+        {
+            if (name.StartsWith("meshopt_"))
+                return name.Substring("meshopt_".Length);
+
+            if (name.StartsWith("MESHOPTIMIZER_"))
+                return name.Substring("MESHOPTIMIZER_".Length);
+
+            return name;
+        }
+
+        /// <summary>
+        /// Capitalize the first letter of a struct field name (camelCase/snake_case → PascalCase).
+        /// Also converts snake_case to PascalCase: "vertex_offset" → "VertexOffset".
+        /// Preserves existing uppercase runs: "bodyID" → "BodyID".
+        /// </summary>
+        public static string PascalCaseField(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return name;
+
+            // Handle snake_case: split on underscores and capitalize each segment
+            if (name.Contains('_'))
+            {
+                var parts = name.Split('_');
+                var sb = new StringBuilder();
+                foreach (var part in parts)
+                {
+                    if (part.Length == 0) continue;
+                    sb.Append(char.ToUpperInvariant(part[0]));
+                    sb.Append(part.Substring(1));
+                }
+                return sb.ToString();
+            }
+
+            // Simple camelCase → PascalCase: capitalize first letter
+            return char.ToUpperInvariant(name[0]) + name.Substring(1);
+        }
+
+        /// <summary>
+        /// Find the longest common prefix at word boundaries among a list of names.
+        /// Handles both SCREAMING_CASE and PascalCase boundaries.
+        /// E.g. given ["meshopt_EncodeExpSeparate", "meshopt_EncodeExpSharedVector"] → "meshopt_EncodeExp".
+        /// </summary>
+        public static string FindCommonPrefix(IEnumerable<string> names)
+        {
+            var list = names.ToList();
+            if (list.Count == 0) return string.Empty;
+            if (list.Count == 1) return string.Empty;
+
+            string first = list[0];
+            int prefixLen = first.Length;
+
+            for (int i = 1; i < list.Count; i++)
+            {
+                prefixLen = Math.Min(prefixLen, list[i].Length);
+                for (int j = 0; j < prefixLen; j++)
+                {
+                    if (first[j] != list[i][j])
+                    {
+                        prefixLen = j;
+                        break;
+                    }
+                }
+            }
+
+            string commonPrefix = first.Substring(0, prefixLen);
+
+            // Check if the prefix already ends at a word boundary:
+            // - The next char after the prefix (in any name that's longer) is uppercase or '_'
+            bool alreadyAtBoundary = false;
+            foreach (var name in list)
+            {
+                if (name.Length > prefixLen)
+                {
+                    char next = name[prefixLen];
+                    if (char.IsUpper(next) || next == '_')
+                    {
+                        alreadyAtBoundary = true;
+                    }
+                    else
+                    {
+                        alreadyAtBoundary = false;
+                    }
+                    break;
+                }
+            }
+
+            if (alreadyAtBoundary)
+                return commonPrefix;
+
+            // Trim backward to the nearest word boundary
+            for (int i = commonPrefix.Length - 1; i > 0; i--)
+            {
+                if (commonPrefix[i] == '_')
+                    return commonPrefix.Substring(0, i + 1); // Include the underscore
+
+                if (char.IsUpper(commonPrefix[i]) && i > 0 && !char.IsUpper(commonPrefix[i - 1]) && commonPrefix[i - 1] != '_')
+                    return commonPrefix.Substring(0, i);
+            }
+
+            return commonPrefix;
+        }
+
+        /// <summary>
+        /// Convert a SCREAMING_CASE identifier to PascalCase.
+        /// E.g. "DONT_ACTIVATE" → "DontActivate", "SUCCESS" → "Success".
+        /// Numeric-leading segments are preserved as-is.
+        /// </summary>
+        public static string ScreamingToPascalCase(string screaming)
+        {
+            if (string.IsNullOrEmpty(screaming))
+                return screaming;
+
+            // If the string doesn't contain underscores and isn't all-uppercase, it's already PascalCase
+            if (!screaming.Contains('_') && !screaming.All(c => char.IsUpper(c) || char.IsDigit(c)))
+                return screaming;
+
+            var parts = screaming.Split('_');
+            var sb = new StringBuilder();
+            foreach (var part in parts)
+            {
+                if (part.Length == 0) continue;
+                if (char.IsDigit(part[0]))
+                {
+                    sb.Append(part);
+                }
+                else
+                {
+                    sb.Append(char.ToUpperInvariant(part[0]));
+                    sb.Append(part.Substring(1).ToLowerInvariant());
+                }
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Escape C# reserved keywords by prefixing with @.
+        /// </summary>
+        public static string EscapeReservedKeyword(string name)
+        {
+            switch (name)
+            {
+                case "abstract":
+                case "as":
+                case "base":
+                case "bool":
+                case "break":
+                case "byte":
+                case "case":
+                case "catch":
+                case "char":
+                case "checked":
+                case "class":
+                case "const":
+                case "continue":
+                case "decimal":
+                case "default":
+                case "delegate":
+                case "do":
+                case "double":
+                case "else":
+                case "enum":
+                case "event":
+                case "explicit":
+                case "extern":
+                case "false":
+                case "finally":
+                case "fixed":
+                case "float":
+                case "for":
+                case "foreach":
+                case "goto":
+                case "if":
+                case "implicit":
+                case "in":
+                case "int":
+                case "interface":
+                case "internal":
+                case "is":
+                case "lock":
+                case "long":
+                case "namespace":
+                case "new":
+                case "null":
+                case "object":
+                case "operator":
+                case "out":
+                case "override":
+                case "params":
+                case "private":
+                case "protected":
+                case "public":
+                case "readonly":
+                case "ref":
+                case "return":
+                case "sbyte":
+                case "sealed":
+                case "short":
+                case "sizeof":
+                case "stackalloc":
+                case "static":
+                case "string":
+                case "struct":
+                case "switch":
+                case "this":
+                case "throw":
+                case "true":
+                case "try":
+                case "typeof":
+                case "uint":
+                case "ulong":
+                case "unchecked":
+                case "unsafe":
+                case "ushort":
+                case "using":
+                case "virtual":
+                case "void":
+                case "volatile":
+                case "while":
+                    return "@" + name;
+                default:
+                    return name;
+            }
         }
 
         public static void PrintComments(StreamWriter file, CppComment comment, string tabs = "", bool newLine = false)
