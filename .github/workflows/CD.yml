@@ -17,7 +17,7 @@ on:
 jobs:
   cd:
     if: github.event_name != 'schedule' || github.ref == 'refs/heads/main'
-    uses: EvergineTeam/evergine-standards/.github/workflows/binding-simple-cd.yml@v2
+    uses: EvergineTeam/Evergine.Bindings/.github/workflows/binding-simple-cd.yml@v1
     with:
       generator-project: "MeshOptimizerGen/MeshOptimizerGen/MeshOptimizerGen.csproj"  # Path to your generator .csproj
       generator-name: "MeshOptimizer"                # Name of your generator executable
