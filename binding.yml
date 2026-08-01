@@ -1,0 +1,33 @@
+# Binding manifest — see https://github.com/EvergineTeam/Evergine.Bindings
+# Schema: https://github.com/EvergineTeam/Evergine.Bindings/blob/main/binding.schema.json
+toolbox: 1.0.0
+
+package:
+  id: Evergine.Bindings.MeshOptimizer
+  project: MeshOptimizerGen/Evergine.Bindings.MeshOptimizer/Evergine.Bindings.MeshOptimizer.csproj
+  target-framework: net10.0
+  runtime-identifier: linux-x64
+
+upstream:
+  kind: git-tree
+  language: cpp
+  project: https://github.com/zeux/meshoptimizer
+  version-from: git-release
+  sources:
+    - repo: zeux/meshoptimizer
+      ref: master
+      remote-path: src/meshoptimizer.h
+      path: MeshOptimizerGen/MeshOptimizerGen/Headers/meshoptimizer.h
+      format: c-header
+
+generator:
+  project: MeshOptimizerGen/MeshOptimizerGen/MeshOptimizerGen.csproj
+  name: MeshOptimizer
+  output:
+    - MeshOptimizerGen/Evergine.Bindings.MeshOptimizer/Generated
+
+# NOTE — this package ships native binaries under Evergine.Bindings.MeshOptimizer/runtimes.
+# The header and those binaries must come from the same upstream revision. `ref: master`
+# is a moving target, so a header bump is only valid together with a native rebuild;
+# binding-updater must label any such pull request `needs-human-review`. Pinning `ref`
+# to a release tag would remove this hazard and is worth considering.
