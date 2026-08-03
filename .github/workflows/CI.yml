@@ -26,7 +26,13 @@ jobs:
       generator-name: "MeshOptimizer"                # Name of your generator executable
       binding-project: "MeshOptimizerGen/Evergine.Bindings.MeshOptimizer/Evergine.Bindings.MeshOptimizer.csproj" # Path to your binding .csproj
       target-framework: "net10.0"                  # Target framework for generator/binding
-      runtime-identifier: "linux-x64"                # Runtime identifier (win-x64, linux-x64, etc.)
+      # Windows, because the CppAst generator cannot read the header anywhere
+      # else: the libclang in the NuGet package has no system include paths and
+      # none of its own builtin headers, so <assert.h> and <stddef.h> fail to
+      # resolve on Linux. CI must match CD or it validates a build the CD will
+      # not reproduce.
+      runner-os: windows-latest
+      runtime-identifier: "win-x64"                # Runtime identifier (win-x64, linux-x64, etc.)
       build-configuration: "Release"               # Build configuration (Release, Debug, etc.)
       nuget-artifacts: ${{ inputs.publish-artifacts || false }}  # Upload NuGets as workflow artifacts
       revision: ${{ github.run_number }}           # Revision for date-based version (bindings style). Use with bindings.

@@ -63,7 +63,18 @@ jobs:
       target-framework: "net10.0"
       dotnet-version: "10.x"
       nuget-version: "6.x"
-      runtime-identifier: "linux-x64"
+      # Generation runs on Windows because that is where the CppAst generator can
+      # read the header at all. The libclang shipped in the NuGet package carries
+      # no system include paths and none of its own builtin headers, so on Linux
+      # `#include <assert.h>` and `<stddef.h>` do not resolve and the parse fails
+      # before a single binding is produced. RenderDoc.NET and KTX.NET generate on
+      # Windows for the same reason.
+      #
+      # This does not constrain the package: the five native libraries are built
+      # in their own matrix job, and `runtime-identifier` here only feeds the
+      # generator's publish, never the packing.
+      runner-os: windows-latest
+      runtime-identifier: "win-x64"
       build-configuration: "Release"
       revision: ${{ github.run_number }}
       # Every artifact already carries its final repository path, so unpacking
