@@ -79,7 +79,12 @@ jobs:
       revision: ${{ github.run_number }}
       # Every artifact already carries its final repository path, so unpacking
       # them over the tree is the whole mapping.
-      natives-artifact-pattern: "natives-*"
+      #
+      # Asked for only when the natives job actually ran. It is skipped whenever
+      # the release has not moved -- most runs, and every republish of work already
+      # merged -- and asking for artifacts that were never produced fails the
+      # download and takes the publish with it.
+      natives-artifact-pattern: ${{ needs.natives.result == 'success' && 'natives-*' || '' }}
       force-publish: ${{ inputs.force-publish || false }}
       publish-enabled: ${{ !inputs.skip-assets-publishing }}
       enable-email-notifications: true
