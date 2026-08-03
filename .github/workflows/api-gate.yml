@@ -1,0 +1,34 @@
+# Two questions on every pull request, both about contracts nobody can see in a
+# diff of 6,000 generated lines.
+#
+# `api` measures what the change does to the public managed API. `coherence`
+# checks that every P/Invoke still resolves in the native libraries the package
+# ships, on all five platforms -- the one failure that compiles, passes CI,
+# publishes, and only shows up in the consumer's application.
+#
+# auto-merge stays off here. This binding rebuilds five native libraries when it
+# bumps, and that pipeline has run a handful of times; measuring first, merging
+# later.
+
+name: API Gate
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  api:
+    uses: EvergineTeam/Evergine.Bindings/.github/workflows/binding-api-gate.yml@v1
+    with:
+      binding-project: "MeshOptimizerGen/Evergine.Bindings.MeshOptimizer/Evergine.Bindings.MeshOptimizer.csproj"
+      auto-merge: false
+      # meshoptimizer.h reports its own version, so this constant changes on every
+      # release. The gate counts a changed constant value as a removal, on purpose
+      # -- that is how a silent renumbering gets caught -- which would make every
+      # bump "breaking" and the verdict worthless. Exempting it leaves the verdict
+      # meaning what it says.
+      exempt-symbols: |
+        \.VERSION =
+
+  coherence:
+    uses: EvergineTeam/Evergine.Bindings/.github/workflows/binding-native-coherence.yml@v1

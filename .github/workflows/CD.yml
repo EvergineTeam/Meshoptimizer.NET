@@ -1,11 +1,22 @@
-# Binding Simple CD - Template
-
-# This template is for pure .NET bindings (no XML update) to publish NuGets to Nuget.org.
-# Copy this file to your repository as `.github/workflows/CD.yml` and customize the inputs below.
+# Keeps this binding on the latest stable meshoptimizer release, header and
+# native libraries together.
+#
+# Three jobs rather than one, because the two halves cannot share a runner: the
+# native libraries need a matrix across Linux, Windows and macOS, and the
+# generator and packaging need a single machine holding the whole tree.
+#
+# `resolve` runs first and alone so exactly one place decides which revision this
+# run is about. If the header and the binaries each worked it out for themselves,
+# a release published midway through would leave them on different versions --
+# and that particular mismatch is invisible: P/Invoke binds late, so the package
+# compiles, passes CI, publishes, and throws in the consumer's application.
 
 name: CD
 
 on:
+  schedule:
+    # Monthly, in step with the rest of the fleet.
+    - cron: '0 2 1 * *'
   workflow_dispatch:
     inputs:
       skip-assets-publishing:
@@ -13,31 +24,67 @@ on:
         required: false
         type: boolean
         default: false
+      force-natives:
+        description: 'Rebuild the native libraries even when the release has not moved'
+        required: false
+        type: boolean
+        default: false
+      force-publish:
+        description: 'Publish even when the generated code is unchanged'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
-  cd:
+  resolve:
     if: github.event_name != 'schedule' || github.ref == 'refs/heads/main'
-    uses: EvergineTeam/Evergine.Bindings/.github/workflows/binding-simple-cd.yml@v1
+    uses: EvergineTeam/Evergine.Bindings/.github/workflows/binding-resolve-upstream.yml@v1
+
+  natives:
+    needs: resolve
+    # Five platform builds is not something to spend on a maybe, hence resolving
+    # first and asking.
+    if: needs.resolve.outputs.ref_moved == 'true' || inputs.force-natives
+    uses: ./.github/workflows/meshopt-cmake.yml
     with:
-      generator-project: "MeshOptimizerGen/MeshOptimizerGen/MeshOptimizerGen.csproj"  # Path to your generator .csproj
-      generator-name: "MeshOptimizer"                # Name of your generator executable
-      binding-project: "MeshOptimizerGen/Evergine.Bindings.MeshOptimizer/Evergine.Bindings.MeshOptimizer.csproj" # Path to your binding .csproj
-      target-framework: "net10.0"                  # Target framework for generator/binding
-      dotnet-version: "10.x"                       # .NET SDK version
-      nuget-version: "6.x"                         # NuGet CLI version
-      runtime-identifier: "linux-x64"                # Runtime identifier (win-x64, linux-x64, etc.)
-      build-configuration: "Release"               # Build configuration (Release, Debug, etc.)
-      revision: ${{ github.run_number }}           # Revision for date-based version (bindings style). Use with bindings.
-      publish-enabled: ${{ !inputs.skip-assets-publishing }}  # Publish NuGets to Nuget.org
-      enable-email-notifications: true             # Enable email notifications on failure
+      ref: ${{ needs.resolve.outputs.resolved_ref }}
+
+  cd:
+    needs: [resolve, natives]
+    # `natives` is skipped whenever the release has not moved, and a skipped
+    # dependency would otherwise take this job with it. The run still has to
+    # reach the CD so it can report the no-op.
+    if: always() && needs.resolve.result == 'success' && needs.natives.result != 'failure' && !cancelled()
+    uses: EvergineTeam/Evergine.Bindings/.github/workflows/binding-tracked-cd.yml@v1
+    with:
+      generator-project: "MeshOptimizerGen/MeshOptimizerGen/MeshOptimizerGen.csproj"
+      generator-name: "MeshOptimizer"
+      binding-project: "MeshOptimizerGen/Evergine.Bindings.MeshOptimizer/Evergine.Bindings.MeshOptimizer.csproj"
+      target-framework: "net10.0"
+      dotnet-version: "10.x"
+      nuget-version: "6.x"
+      # Generation runs on Windows because that is where the CppAst generator can
+      # read the header at all. The libclang shipped in the NuGet package carries
+      # no system include paths and none of its own builtin headers, so on Linux
+      # `#include <assert.h>` and `<stddef.h>` do not resolve and the parse fails
+      # before a single binding is produced. RenderDoc.NET and KTX.NET generate on
+      # Windows for the same reason.
+      #
+      # This does not constrain the package: the five native libraries are built
+      # in their own matrix job, and `runtime-identifier` here only feeds the
+      # generator's publish, never the packing.
+      runner-os: windows-latest
+      runtime-identifier: "win-x64"
+      build-configuration: "Release"
+      revision: ${{ github.run_number }}
+      # Every artifact already carries its final repository path, so unpacking
+      # them over the tree is the whole mapping.
+      natives-artifact-pattern: "natives-*"
+      force-publish: ${{ inputs.force-publish || false }}
+      publish-enabled: ${{ !inputs.skip-assets-publishing }}
+      enable-email-notifications: true
     secrets:
       NUGET_UPLOAD_TOKEN: ${{ secrets.EVERGINE_NUGETORG_TOKEN }}
       WAVE_SENDGRID_TOKEN: ${{ secrets.WAVE_SENDGRID_TOKEN }}
       EVERGINE_EMAILREPORT_LIST: ${{ secrets.EVERGINE_EMAILREPORT_LIST }}
       EVERGINE_EMAIL: ${{ secrets.EVERGINE_EMAIL }}
-
-# Tips:
-# - For direct version (add-ons style):
-#   version: "3.4.22.288-local"
-# - For date-based version (bindings style):
-#   revision: ""  # Uses github.run_number or custom logic

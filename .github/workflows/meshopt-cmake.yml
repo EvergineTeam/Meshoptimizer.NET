@@ -1,36 +1,80 @@
+# Builds the five native libraries this package ships.
+#
+# Callable from CD.yml, which passes the release the manifest resolved to. The
+# header and these binaries must come from the same revision: P/Invoke binds
+# late, so a mismatched package compiles, passes CI, publishes, and throws
+# EntryPointNotFoundException in the consumer's application. Nothing between
+# here and there would notice.
+#
+# The cmake invocations stay in this repository rather than in the toolbox.
+# meshoptimizer's build has nothing in common with KTX's or xatlas's, and
+# parameterising all three into one reusable workflow would produce something
+# with an escape hatch per project -- worse than three small honest files.
+
 name: Build meshoptimizer Libraries
 
 on:
+  workflow_call:
+    inputs:
+      ref:
+        description: 'meshoptimizer revision to build'
+        required: true
+        type: string
   workflow_dispatch:
+    inputs:
+      ref:
+        description: 'meshoptimizer revision to build (tag, branch or SHA)'
+        required: true
+        type: string
+        default: 'v1.2'
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
+      # One platform failing must not leave the others publishing a half-updated
+      # set of binaries.
+      fail-fast: true
       matrix:
         include:
           - os: ubuntu-latest
             arch: x64
             cmake-arch: x64
+            rid: linux-x64
+            libname: libmeshoptimizer.so
           - os: ubuntu-latest
             arch: arm64
             cmake-arch: aarch64
+            rid: linux-arm64
+            libname: libmeshoptimizer.so
           - os: windows-latest
             arch: x64
             cmake-arch: x64
+            rid: win-x64
+            libname: meshoptimizer.dll
           - os: windows-latest
             arch: arm64
             cmake-arch: ARM64
+            rid: win-arm64
+            libname: meshoptimizer.dll
           - os: macos-latest
             arch: arm64
             cmake-arch: arm64
+            rid: osx-arm64
+            libname: libmeshoptimizer.dylib
 
     steps:
       - name: Checkout meshoptimizer
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: zeux/meshoptimizer
-          ref: v1.0
+          ref: ${{ inputs.ref }}
+
+      - name: Record what is being built
+        shell: bash
+        run: |
+          echo "Building ${{ inputs.ref }} for ${{ matrix.rid }}"
+          grep -m1 MESHOPTIMIZER_VERSION src/meshoptimizer.h
 
       - name: Install dependencies on Ubuntu
         if: matrix.os == 'ubuntu-latest'
@@ -80,23 +124,60 @@ jobs:
       - name: Build meshoptimizer
         run: cmake --build build --config Release
 
-      - name: Upload meshoptimizer.dll (Windows)
-        if: matrix.os == 'windows-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: meshoptimizer-${{ matrix.arch }}-dll
-          path: build/**/*.dll
+      # Staged into the exact layout the package expects, so the CD can unpack
+      # every platform's artifact over the project directory and be done. The
+      # previous version uploaded `build/**/*.dll`, whose intermediate paths
+      # differ per platform, and a human mapped them by hand afterwards.
+      - name: Stage into the runtimes layout
+        shell: bash
+        run: |
+          set -euo pipefail
+          dest="staged/MeshOptimizerGen/Evergine.Bindings.MeshOptimizer/runtimes/${{ matrix.rid }}/native"
+          mkdir -p "$dest"
+          found=$(find build -name '${{ matrix.libname }}' -type f | head -1)
+          [ -n "$found" ] || { echo "::error::${{ matrix.libname }} not produced for ${{ matrix.rid }}"; exit 1; }
+          cp "$found" "$dest/${{ matrix.libname }}"
+          ls -la "$dest"
 
-      - name: Upload libmeshoptimizer.so (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: meshoptimizer-${{ matrix.arch }}-so
-          path: build/**/*.so
+      # The exported symbols are the contract the managed binding P/Invokes
+      # against. Recording them makes a rebuild auditable: comparing this list
+      # against the previous release's is what tells you the toolchain still
+      # produces an equivalent library, which byte comparison never will --
+      # different compiler, different date, different bytes, same library.
+      #
+      # The dumper reads the binary format directly instead of scraping nm and
+      # dumpbin. Scraping dumpbin's prose reported the DLL's own name and
+      # fragments of decorated C++ names as exports, which turned a clean
+      # comparison into two phantom differences to explain away.
+      - name: Record exported symbols
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p exports
+          gh api "repos/EvergineTeam/Evergine.Bindings/contents/tools/dump-exports.py?ref=v1" \
+            -H 'Accept: application/vnd.github.raw' > dump-exports.py
+          python -m pip install --quiet pefile pyelftools macholib
+          lib="staged/MeshOptimizerGen/Evergine.Bindings.MeshOptimizer/runtimes/${{ matrix.rid }}/native/${{ matrix.libname }}"
+          python dump-exports.py "$lib" meshopt_ > "exports/${{ matrix.rid }}.txt"
+          count=$(wc -l < "exports/${{ matrix.rid }}.txt")
+          {
+            echo "### ${{ matrix.rid }} — $count exported symbols"
+            echo ""
+            echo "Built from \`${{ inputs.ref }}\`."
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Upload libmeshoptimizer.dylib (macOS)
-        if: matrix.os == 'macos-latest'
+      - name: Upload native library
         uses: actions/upload-artifact@v4
         with:
-          name: meshoptimizer-${{ matrix.arch }}-dylib
-          path: build/**/*.dylib
+          name: natives-${{ matrix.rid }}
+          path: staged/
+          if-no-files-found: error
+
+      - name: Upload exported symbols
+        uses: actions/upload-artifact@v4
+        with:
+          name: exports-${{ matrix.rid }}
+          path: exports/
+          if-no-files-found: error
