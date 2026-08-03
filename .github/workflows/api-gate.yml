@@ -22,6 +22,13 @@ jobs:
     with:
       binding-project: "MeshOptimizerGen/Evergine.Bindings.MeshOptimizer/Evergine.Bindings.MeshOptimizer.csproj"
       auto-merge: false
+      # meshoptimizer.h reports its own version, so this constant changes on every
+      # release. The gate counts a changed constant value as a removal, on purpose
+      # -- that is how a silent renumbering gets caught -- which would make every
+      # bump "breaking" and the verdict worthless. Exempting it leaves the verdict
+      # meaning what it says.
+      exempt-symbols: |
+        \.VERSION =
 
   coherence:
     uses: EvergineTeam/Evergine.Bindings/.github/workflows/binding-native-coherence.yml@v1
