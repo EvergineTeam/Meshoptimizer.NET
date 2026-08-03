@@ -144,34 +144,24 @@ jobs:
       # against the previous release's is what tells you the toolchain still
       # produces an equivalent library, which byte comparison never will --
       # different compiler, different date, different bytes, same library.
+      #
+      # The dumper reads the binary format directly instead of scraping nm and
+      # dumpbin. Scraping dumpbin's prose reported the DLL's own name and
+      # fragments of decorated C++ names as exports, which turned a clean
+      # comparison into two phantom differences to explain away.
       - name: Record exported symbols
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          set -uo pipefail
+          set -euo pipefail
           mkdir -p exports
+          gh api "repos/EvergineTeam/Evergine.Bindings/contents/tools/dump-exports.py?ref=v1" \
+            -H 'Accept: application/vnd.github.raw' > dump-exports.py
+          python -m pip install --quiet pefile pyelftools macholib
           lib="staged/MeshOptimizerGen/Evergine.Bindings.MeshOptimizer/runtimes/${{ matrix.rid }}/native/${{ matrix.libname }}"
-          out="exports/${{ matrix.rid }}.txt"
-          case "${{ matrix.os }}" in
-            ubuntu-latest)
-              NM=nm
-              [ "${{ matrix.arch }}" = "arm64" ] && NM=aarch64-linux-gnu-nm
-              "$NM" -D --defined-only "$lib" | awk '{print $NF}' | grep '^meshopt' | sort -u > "$out"
-              ;;
-            macos-latest)
-              nm -gU "$lib" | awk '{print $NF}' | sed 's/^_//' | grep '^meshopt' | sort -u > "$out"
-              ;;
-            windows-latest)
-              # dumpbin lives inside the Visual Studio install; vswhere finds it
-              # without hardcoding a version that will move.
-              vs=$("/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" -latest -property installationPath)
-              dumpbin=$(find "$vs/VC/Tools/MSVC" -name dumpbin.exe -path '*x64*' | head -1)
-              [ -n "$dumpbin" ] || { echo "::error::dumpbin not found"; exit 1; }
-              "$dumpbin" //exports "$lib" | grep -oE '\bmeshopt[A-Za-z0-9_]*' | sort -u > "$out"
-              ;;
-          esac
-          count=$(wc -l < "$out")
-          echo "$count exported meshopt symbols for ${{ matrix.rid }}"
-          [ "$count" -gt 0 ] || { echo "::error::no meshopt symbols exported -- the library is not what we think it is"; exit 1; }
+          python dump-exports.py "$lib" meshopt_ > "exports/${{ matrix.rid }}.txt"
+          count=$(wc -l < "exports/${{ matrix.rid }}.txt")
           {
             echo "### ${{ matrix.rid }} — $count exported symbols"
             echo ""
