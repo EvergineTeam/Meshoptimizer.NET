@@ -13,9 +13,16 @@ upstream:
   language: cpp
   project: https://github.com/zeux/meshoptimizer
   version-from: git-release
+  # This binding follows tagged releases, not a branch. It ships native binaries,
+  # and the header and those binaries have to come from the same revision -- a
+  # branch would move the header underneath libraries built from something else.
+  # `current` is rewritten by binding-fetch-upstream when it brings in a newer
+  # release, which makes this the one place the version lives.
+  release:
+    track: stable
+    current: v1.0
   sources:
     - repo: zeux/meshoptimizer
-      ref: master
       remote-path: src/meshoptimizer.h
       path: MeshOptimizerGen/MeshOptimizerGen/Headers/meshoptimizer.h
       format: c-header
@@ -27,7 +34,11 @@ generator:
     - MeshOptimizerGen/Evergine.Bindings.MeshOptimizer/Generated
 
 # NOTE — this package ships native binaries under Evergine.Bindings.MeshOptimizer/runtimes.
-# The header and those binaries must come from the same upstream revision. `ref: master`
-# is a moving target, so a header bump is only valid together with a native rebuild;
-# binding-updater must label any such pull request `needs-human-review`. Pinning `ref`
-# to a release tag would remove this hazard and is worth considering.
+# The header and those binaries must come from the same upstream revision, so a header
+# bump is only valid together with a native rebuild. That rebuild is not optional and it
+# is not something CI would catch if it were skipped: P/Invoke binds late, so a mismatched
+# package compiles, passes CI, publishes, and then throws EntryPointNotFoundException in
+# the consumer's application.
+#
+# The CD keeps the two in step: `meshopt-cmake.yml` rebuilds all five platforms at the
+# resolved release before the header is committed. Do not bump the header by hand.
