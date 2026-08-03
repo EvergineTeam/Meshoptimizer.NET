@@ -20,7 +20,7 @@ upstream:
   # release, which makes this the one place the version lives.
   release:
     track: stable
-    current: v1.0
+    current: v1.2
   sources:
     - repo: zeux/meshoptimizer
       remote-path: src/meshoptimizer.h
