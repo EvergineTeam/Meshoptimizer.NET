@@ -1,14 +1,15 @@
-# Two questions on every pull request, both about contracts nobody can see in a
-# diff of 6,000 generated lines.
+# Measures what a pull request does to the public contract, and merges the
+# binding updater's work when nothing anyone depends on has moved.
 #
-# `api` measures what the change does to the public managed API. `coherence`
-# checks that every P/Invoke still resolves in the native libraries the package
-# ships, on all five platforms -- the one failure that compiles, passes CI,
-# publishes, and only shows up in the consumer's application.
+# Two questions, both invisible in a diff of thousands of generated lines: which
+# public symbols moved, and whether every P/Invoke still resolves in the five
+# native libraries this package ships.
 #
-# auto-merge stays off here. This binding rebuilds five native libraries when it
-# bumps, and that pipeline has run a handful of times; measuring first, merging
-# later.
+# The second is not optional here and it is not a separate workflow. The agent
+# that opens these pull requests runs the generator, not the native build, so
+# regenerating against a newer header leaves the old binaries in place. That reads
+# as purely additive -- new symbols, none removed -- while every new symbol is
+# missing from the libraries. Folded into the gate, the merge depends on it.
 
 name: API Gate
 
@@ -21,14 +22,14 @@ jobs:
     uses: EvergineTeam/Evergine.Bindings/.github/workflows/binding-api-gate.yml@v1
     with:
       binding-project: "MeshOptimizerGen/Evergine.Bindings.MeshOptimizer/Evergine.Bindings.MeshOptimizer.csproj"
-      auto-merge: false
+      auto-merge: true
+      native-coherence: true
+      app-client-id: ${{ vars.APP_CLIENT_ID }}
       # meshoptimizer.h reports its own version, so this constant changes on every
       # release. The gate counts a changed constant value as a removal, on purpose
       # -- that is how a silent renumbering gets caught -- which would make every
-      # bump "breaking" and the verdict worthless. Exempting it leaves the verdict
-      # meaning what it says.
+      # bump "breaking" and the verdict worthless.
       exempt-symbols: |
         \.VERSION =
-
-  coherence:
-    uses: EvergineTeam/Evergine.Bindings/.github/workflows/binding-native-coherence.yml@v1
+    secrets:
+      APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
