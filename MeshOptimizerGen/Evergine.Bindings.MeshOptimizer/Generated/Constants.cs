@@ -5,6 +5,6 @@ namespace Evergine.Bindings.MeshOptimizer
 {
 	public static partial class MeshOptimizer
 	{
-		public const uint VERSION = 1020;
+		public const uint VERSION = 1030;
 	}
 }

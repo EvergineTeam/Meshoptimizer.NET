@@ -101,7 +101,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		Regularize = 16,
 
 		/// <summary>
-		/// Experimental: Allow collapses across attribute discontinuities, except for vertices that are tagged with meshopt_SimplifyVertex_Protect in vertex_lock. 
+		/// Allow collapses across attribute discontinuities, except for vertices that are tagged with meshopt_SimplifyVertex_Protect in vertex_lock. 
 		/// </summary>
 		Permissive = 32,
 
@@ -109,6 +109,16 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// Produce more regular triangle sizes and shapes during simplification, at a small cost to geometric and attribute quality. 
 		/// </summary>
 		RegularizeLight = 64,
+
+		/// <summary>
+		/// Experimental: Try to preserve fold lines between opposite-facing triangles, at a small performance cost. 
+		/// </summary>
+		PreserveFolds = 128,
+
+		/// <summary>
+		/// Experimental: Clamp attribute error to match position error scale and avoid extreme error values in areas with high attribute variance. 
+		/// </summary>
+		ErrorClamped = 256,
 	}
 
 	/// <summary>
@@ -147,9 +157,27 @@ namespace Evergine.Bindings.MeshOptimizer
 		Compatible = 1,
 
 		/// <summary>
-		/// Experimental: For vertices only connected to degenerate triangles, output zero tangents instead of an arbitrary fallback.  
+		/// For vertices only connected to degenerate triangles, output zero tangents instead of an arbitrary fallback.  
 		/// </summary>
 		ZeroFallback = 2,
+	}
+
+	/// <summary>
+	/// Experimental: Remeshing flags
+	/// </summary>
+	[Flags]
+	public enum RemeshOptions : uint
+	{
+
+		/// <summary>
+		/// Produce a two-sided shell that wraps around surfaces of the original mesh, instead of a solid mesh. 
+		/// </summary>
+		Shell = 1,
+
+		/// <summary>
+		/// Compute optimal output positions that approximate the original surface as closely as possible. 
+		/// </summary>
+		Solve = 2,
 	}
 
 }

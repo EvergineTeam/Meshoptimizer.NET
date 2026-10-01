@@ -61,7 +61,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		public static extern void RemapIndexBuffer(uint* destination, uint* indices, nuint index_count, uint* remap);
 
 		/// <summary>
-		/// Experimental: Filter out redundant triangles from the index buffer and return the number of remaining indices
+		/// Filter out redundant triangles from the index buffer and return the number of remaining indices
 		/// Triangles are considered redundant if they are degenerate (two vertices have the same vertex key) or duplicate (matching triangle was present earlier).
 		/// First vertex_size bytes of every vertex are compared for equality; typically vertex_size should be set to the size of the position attribute.
 		/// Note that duplicate triangles with opposite windings are preserved, as they may be needed for double-sided rendering.
@@ -71,7 +71,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		public static extern nuint FilterIndexBuffer(uint* destination, uint* indices, nuint index_count, void* vertices, nuint vertex_count, nuint vertex_size, nuint vertex_stride);
 
 		/// <summary>
-		/// Experimental: Filter out redundant triangles from the index buffer and return the number of remaining indices
+		/// Filter out redundant triangles from the index buffer and return the number of remaining indices
 		/// Triangles are considered redundant if they are degenerate (two vertices have the same vertex key) or duplicate (matching triangle was present earlier).
 		/// All bytes in specified streams are compared for equality; streams should include attributes relevant for position transform (e.g. bone influences).
 		/// Note that duplicate triangles with opposite windings are preserved, as they may be needed for double-sided rendering.
@@ -789,7 +789,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		public static extern void SpatialClusterPoints(uint* destination, float* vertex_positions, nuint vertex_count, nuint vertex_positions_stride, nuint cluster_size);
 
 		/// <summary>
-		/// Experimental: Opacity micromap generator (measure)
+		/// Opacity micromap generator (measure)
 		/// Computes a subdivision level for each input triangle, as well as deduplicating the triangles that reference the same UVs to reduce rasterization requests.
 		/// Returns the number of OMM entries.
 		/// levels and sources must contain enough space for the worst case output (index_count/3 elements, one per resulting OMM entry)
@@ -803,7 +803,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		public static extern nuint OpacityMapMeasure(byte* levels, uint* sources, int* omm_indices, uint* indices, nuint index_count, float* vertex_uvs, nuint vertex_count, nuint vertex_uvs_stride, uint texture_width, uint texture_height, int max_level, float target_edge);
 
 		/// <summary>
-		/// Experimental: Opacity micromap generator (rasterize)
+		/// Opacity micromap generator (rasterize)
 		/// Rasterizes opacity state for a single triangle entry by sampling the alpha texture, using bilinear filtering and 0.5 alpha cutoff.
 		/// result should contain enough space for the output opacity data (which can be computed using meshopt_opacityMapEntrySize)
 		/// level specifies the subdivision level (0..12)
@@ -820,7 +820,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		public static extern nuint OpacityMapEntrySize(int level, int states);
 
 		/// <summary>
-		/// Experimental: Opacity micromap generator (compact)
+		/// Opacity micromap generator (compact)
 		/// Compacts and deduplicates opacity data, merging identical micromap entries and replacing micromap states with special indices (-4..-1) when possible.
 		/// Returns the number of OMM entries after compaction; the data array should be trimmed using the last offset/size.
 		/// data should contain opacity data for all input/output entries
@@ -834,12 +834,12 @@ namespace Evergine.Bindings.MeshOptimizer
 		public static extern nuint OpacityMapCompact(byte* data, nuint data_size, byte* levels, uint* offsets, nuint omm_count, int* omm_indices, nuint triangle_count, int states);
 
 		/// <summary>
-		/// Experimental: Tangent space generator
+		/// Tangent space generator
 		/// Computes per-corner tangent vectors; for each corner, computes normalized tangent vector (xyz) and orientation (w, +/-1).
 		/// Bitangent can be reconstructed via cross(normal, tangent.xyz) * tangent.w.
 		/// To apply tangents to the mesh, either deindex and reindex it with the tangent stream, or copy tangents to existing vertex data while duplicating
 		/// vertices with different tangent vectors (e.g. on UV mirror seams).
-		/// Input can be indexed or unindexed (indices=NULL); this does not affect the resulting tangents, but indexed inputs are ~30% faster to process.
+		/// Input can be indexed or unindexed (indices=NULL); this does not affect the resulting tangents, but indexed inputs are faster to process.
 		/// result must contain enough space for the output tangent data (index_count*4 elements)
 		/// indices can be NULL if the input is unindexed
 		/// vertex_positions should have float3 position in the first 12 bytes of each vertex
@@ -848,6 +848,35 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// </summary>
 		[DllImport("meshoptimizer", EntryPoint = "meshopt_generateTangents", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void GenerateTangents(float* result, uint* indices, nuint index_count, float* vertex_positions, nuint vertex_count, nuint vertex_positions_stride, float* vertex_normals, nuint vertex_normals_stride, float* vertex_uvs, nuint vertex_uvs_stride, uint options);
+
+		/// <summary>
+		/// Experimental: Normal generator
+		/// Computes per-corner normal vectors; normals are averaged across soft edges, using crease angle to determine which edges are hard.
+		/// To apply normals to the mesh, either deindex and reindex it with the normal stream, or copy normals to existing vertex data while duplicating
+		/// vertices with different normal vectors (on normal seams).
+		/// Input can be indexed or unindexed (indices=NULL); this does not affect the resulting normals, but indexed inputs are faster to process.
+		/// result must contain enough space for the output normal data (index_count*3 elements)
+		/// indices can be NULL if the input is unindexed
+		/// vertex_positions should have float3 position in the first 12 bytes of each vertex
+		/// crease_angle specifies the angle in radians below which normals are averaged across edges
+		/// smoothing specifies the amount of smoothing to apply to resulting normals as a post-process; larger smoothing values take longer, with the recommended range being [0..5].
+		/// </summary>
+		[DllImport("meshoptimizer", EntryPoint = "meshopt_generateNormals", CallingConvention = CallingConvention.Cdecl)]
+		public static extern void GenerateNormals(float* result, uint* indices, nuint index_count, float* vertex_positions, nuint vertex_count, nuint vertex_positions_stride, float crease_angle, float smoothing);
+
+		/// <summary>
+		/// Experimental: Voxel remesher
+		/// Generates a new mesh that approximates or refines the original mesh, attempting to preserve mesh appearance at a given voxel resolution.
+		/// The original topology is not preserved; features that are closer than the voxel size may be merged, and small gaps in the original mesh may be closed.
+		/// Returns the number of triangles in the new mesh, with destination containing a vertex position for each triangle corner.
+		/// destination can be NULL; when it's not NULL, it must contain enough space for the resulting triangle buffer (max_triangle_count * 3 vertices, 3 floats per vertex)
+		/// max_triangle_count is the number of triangles that can be written; when destination is NULL or insufficiently large, the returned value is an upper bound on the number of triangles
+		/// vertex_positions should have float3 position in the first 12 bytes of each vertex
+		/// resolution is the dimension of the internal voxel grid and should be in the range [4, 256]
+		/// options must be a bitmask composed of meshopt_RemeshX options; 0 is a safe default
+		/// </summary>
+		[DllImport("meshoptimizer", EntryPoint = "meshopt_remesh", CallingConvention = CallingConvention.Cdecl)]
+		public static extern nuint Remesh(float* destination, nuint max_triangle_count, uint* indices, nuint index_count, float* vertex_positions, nuint vertex_count, nuint vertex_positions_stride, int resolution, uint options);
 
 		/// <summary>
 		/// Quantize a float into half-precision (as defined by IEEE-754 fp16) floating point value
@@ -874,7 +903,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		public static extern float DequantizeHalf(ushort h);
 
 		/// <summary>
-		/// Experimental: Compute shared exponent suitable for mesh/cluster position quantization
+		/// Compute shared exponent suitable for mesh/cluster position quantization
 		/// Given mesh or cluster bounds, compute a shared exponent that can be used to quantize any position inside the bounds to a 24-bit integer grid.
 		/// The resulting output can be stored as a compact bit-stream to be decoded directly in shaders, or to be used as an input to RT BVH builders,
 		/// for example via D3D12_VERTEX_FORMAT_COMPRESSED1 in DXR2 (max_bits=16).
@@ -883,7 +912,7 @@ namespace Evergine.Bindings.MeshOptimizer
 		/// iv = int(round(v / scale))
 		/// The resulting integer can be stored as signed 24-bit, or as an unsigned offset from a signed 24-bit anchor value, shared between all positions.
 		/// minv/maxv specify the axis-aligned bounding box of the mesh or cluster; each should refer to a float3 value
-		/// min_exp specifies the minimum value for the returned exponent, limiting precision to reduce size; e.g. min_exp = -10 will produce minimum error of 1mm given metric units
+		/// min_exp specifies the minimum value for the returned exponent, limiting precision to reduce size; e.g. min_exp = -10 limits precision to 1mm given metric units
 		/// max_bits specifies the maximum allowed number of bits for the quantized integer range (offset from anchor is an unsigned integer up to 2^max_bits-1)
 		/// </summary>
 		[DllImport("meshoptimizer", EntryPoint = "meshopt_computePositionExponent", CallingConvention = CallingConvention.Cdecl)]
